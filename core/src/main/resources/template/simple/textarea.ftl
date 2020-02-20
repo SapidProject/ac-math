@@ -19,11 +19,11 @@
  */
 -->
 <textarea<#rt/>
- name="${(parameters.name!"")}"<#rt/>
- cols="${(parameters.cols!"")}"<#rt/>
- rows="${(parameters.rows!"")}"<#rt/>
+ name="${(parameters.name!"")?html}"<#rt/>
+ cols="${(parameters.cols!"")?html}"<#rt/>
+ rows="${(parameters.rows!"")?html}"<#rt/>
 <#if parameters.wrap?has_content>
- wrap="${parameters.wrap}"<#rt/>
+ wrap="${parameters.wrap?html}"<#rt/>
 </#if>
 <#if parameters.disabled!false>
  disabled="disabled"<#rt/>
@@ -32,14 +32,14 @@
  readonly="readonly"<#rt/>
 </#if>
 <#if parameters.tabindex?has_content>
- tabindex="${parameters.tabindex}"<#rt/>
+ tabindex="${parameters.tabindex?html}"<#rt/>
 </#if>
 <#if parameters.id?has_content>
- id="${parameters.id}"<#rt/>
+ id="${parameters.id?html}"<#rt/>
 </#if>
 <#include "/${parameters.templateDir}/${parameters.expandTheme}/css.ftl" />
 <#if parameters.title?has_content>
- title="${parameters.title}"<#rt/>
+ title="${parameters.title?html}"<#rt/>
 </#if>
 <#include "/${parameters.templateDir}/${parameters.expandTheme}/scripting-events.ftl" />
 <#include "/${parameters.templateDir}/${parameters.expandTheme}/common-attributes.ftl" />

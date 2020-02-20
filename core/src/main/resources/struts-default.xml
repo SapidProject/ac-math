@@ -23,8 +23,8 @@
 <!--
     When declaring beans in this file you must either use name="struts" or don't name the bean at all.
 
-    The name="struts" must be used when alias was defined in {@link org.apache.struts2.config.StrutsBeanSelectionProvider} -
-    it is then the default bean's name and {@link org.apache.struts2.config.StrutsBeanSelectionProvider} links name "struts"
+    The name="struts" must be used when alias was defined in {@link org.apache.struts2.config.DefaultBeanSelectionProvider} -
+    it is then the default bean's name and {@link org.apache.struts2.config.DefaultBeanSelectionProvider} links name "struts"
     with "default" (aliasing it)
 
     If name won't be defined then the "default" value will be used {@link com.opensymphony.xwork2.inject.Container#DEFAULT_NAME}
@@ -45,7 +45,12 @@
                 java.lang.ClassLoader,
                 java.lang.Shutdown,
                 java.lang.ProcessBuilder,
-                sun.misc.Unsafe,
+                ognl.OgnlContext,
+                ognl.ClassResolver,
+                ognl.TypeConverter,
+                ognl.MemberAccess,
+                ognl.DefaultMemberAccess,
+                com.opensymphony.xwork2.ognl.SecurityMemberAccess,
                 com.opensymphony.xwork2.ActionContext" />
 
     <!-- this must be valid regex, each '.' in package name must be escaped! -->
@@ -55,30 +60,20 @@
     <!-- this is simpler version of the above used with string comparison -->
     <constant name="struts.excludedPackageNames"
               value="
+                java.lang.,
                 ognl.,
-                java.io.,
-                java.net.,
-                java.nio.,
-                javax.,
+                javax,
                 freemarker.core.,
                 freemarker.template.,
-                freemarker.ext.jsp.,
                 freemarker.ext.rhino.,
-                sun.misc.,
+                freemarker.ext.beans.,
                 sun.reflect.,
-                javassist.,
-                org.apache.velocity.,
-                org.objectweb.asm.,
-                org.springframework.context.,
-                com.opensymphony.xwork2.inject.,
-                com.opensymphony.xwork2.ognl.,
-                com.opensymphony.xwork2.security.,
-                com.opensymphony.xwork2.util." />
+                javassist." />
 
     <bean class="com.opensymphony.xwork2.ObjectFactory" name="struts"/>
     <bean type="com.opensymphony.xwork2.factory.ResultFactory" name="struts" class="org.apache.struts2.factory.StrutsResultFactory" />
     <bean type="com.opensymphony.xwork2.factory.ActionFactory" name="struts" class="com.opensymphony.xwork2.factory.DefaultActionFactory" />
-    <bean type="com.opensymphony.xwork2.factory.ConverterFactory" name="struts" class="com.opensymphony.xwork2.factory.StrutsConverterFactory" />
+    <bean type="com.opensymphony.xwork2.factory.ConverterFactory" name="struts" class="com.opensymphony.xwork2.factory.DefaultConverterFactory" />
     <bean type="com.opensymphony.xwork2.factory.InterceptorFactory" name="struts" class="com.opensymphony.xwork2.factory.DefaultInterceptorFactory" />
     <bean type="com.opensymphony.xwork2.factory.ValidatorFactory" name="struts" class="com.opensymphony.xwork2.factory.DefaultValidatorFactory" />
     <bean type="com.opensymphony.xwork2.factory.UnknownHandlerFactory" name="struts" class="com.opensymphony.xwork2.factory.DefaultUnknownHandlerFactory" />
@@ -99,29 +94,31 @@
 
     <bean type="org.apache.struts2.dispatcher.mapper.ActionMapper" name="struts" class="org.apache.struts2.dispatcher.mapper.DefaultActionMapper" />
     <bean type="org.apache.struts2.dispatcher.mapper.ActionMapper" name="composite" class="org.apache.struts2.dispatcher.mapper.CompositeActionMapper" />
-    <bean type="org.apache.struts2.dispatcher.mapper.ActionMapper" name="prefix" class="org.apache.struts2.dispatcher.mapper.PrefixBasedActionMapper" />
     <bean type="org.apache.struts2.dispatcher.mapper.ActionMapper" name="restful" class="org.apache.struts2.dispatcher.mapper.RestfulActionMapper" />
     <bean type="org.apache.struts2.dispatcher.mapper.ActionMapper" name="restful2" class="org.apache.struts2.dispatcher.mapper.Restful2ActionMapper" />
 
     <bean type="org.apache.struts2.dispatcher.multipart.MultiPartRequest" name="jakarta" class="org.apache.struts2.dispatcher.multipart.JakartaMultiPartRequest" scope="prototype"/>
     <bean type="org.apache.struts2.dispatcher.multipart.MultiPartRequest" name="jakarta-stream" class="org.apache.struts2.dispatcher.multipart.JakartaStreamMultiPartRequest" scope="prototype"/>
 
+    <bean type="org.apache.struts2.views.TagLibraryDirectiveProvider" name="s" class="org.apache.struts2.views.DefaultTagLibrary" />
     <bean type="org.apache.struts2.views.TagLibraryModelProvider" name="s" class="org.apache.struts2.views.DefaultTagLibrary" />
 
     <bean class="org.apache.struts2.views.freemarker.FreemarkerThemeTemplateLoader" />
     <bean class="org.apache.struts2.views.freemarker.FreemarkerManager" name="struts" />
+    <bean class="org.apache.struts2.views.velocity.VelocityManager" name="struts" optional="true" />
 
     <bean class="org.apache.struts2.components.template.TemplateEngineManager" />
     <bean type="org.apache.struts2.components.template.TemplateEngine" name="ftl" class="org.apache.struts2.components.template.FreemarkerTemplateEngine" />
+    <bean type="org.apache.struts2.components.template.TemplateEngine" name="vm" class="org.apache.struts2.components.template.VelocityTemplateEngine" />
     <bean type="org.apache.struts2.components.template.TemplateEngine" name="jsp" class="org.apache.struts2.components.template.JspTemplateEngine" />
 
     <bean type="com.opensymphony.xwork2.conversion.impl.XWorkConverter" name="struts" class="com.opensymphony.xwork2.conversion.impl.XWorkConverter" />
 
-    <bean type="com.opensymphony.xwork2.conversion.ConversionPropertiesProcessor" name="struts" class="org.apache.struts2.conversion.StrutsConversionPropertiesProcessor" />
+    <bean type="com.opensymphony.xwork2.conversion.ConversionPropertiesProcessor" name="struts" class="com.opensymphony.xwork2.conversion.impl.DefaultConversionPropertiesProcessor" />
     <bean type="com.opensymphony.xwork2.conversion.ConversionFileProcessor" name="struts" class="com.opensymphony.xwork2.conversion.impl.DefaultConversionFileProcessor" />
     <bean type="com.opensymphony.xwork2.conversion.ConversionAnnotationProcessor" name="struts" class="com.opensymphony.xwork2.conversion.impl.DefaultConversionAnnotationProcessor" />
-    <bean type="com.opensymphony.xwork2.conversion.TypeConverterCreator" name="struts" class="org.apache.struts2.conversion.StrutsTypeConverterCreator" />
-    <bean type="com.opensymphony.xwork2.conversion.TypeConverterHolder" name="struts" class="org.apache.struts2.conversion.StrutsTypeConverterHolder" />
+    <bean type="com.opensymphony.xwork2.conversion.TypeConverterCreator" name="struts" class="com.opensymphony.xwork2.conversion.impl.DefaultTypeConverterCreator" />
+    <bean type="com.opensymphony.xwork2.conversion.TypeConverterHolder" name="struts" class="com.opensymphony.xwork2.conversion.impl.DefaultTypeConverterHolder" />
 
     <bean class="com.opensymphony.xwork2.conversion.impl.XWorkBasicConverter" />
 
@@ -179,6 +176,8 @@
 
     <bean type="org.apache.struts2.dispatcher.DispatcherErrorHandler" name="struts" class="org.apache.struts2.dispatcher.DefaultDispatcherErrorHandler" />
     
+    <constant name="struts.dispatcher.errorHandler" value="struts" />
+
     <!--  Silly workarounds for OGNL since there is currently no way to flush its internal caches -->
     <bean type="ognl.PropertyAccessor" name="java.util.ArrayList" class="com.opensymphony.xwork2.ognl.accessor.XWorkListPropertyAccessor" />
     <bean type="ognl.PropertyAccessor" name="java.util.HashSet" class="com.opensymphony.xwork2.ognl.accessor.XWorkCollectionPropertyAccessor" />
@@ -198,6 +197,7 @@
             <result-type name="redirect" class="org.apache.struts2.result.ServletRedirectResult"/>
             <result-type name="redirectAction" class="org.apache.struts2.result.ServletActionRedirectResult"/>
             <result-type name="stream" class="org.apache.struts2.result.StreamResult"/>
+            <result-type name="velocity" class="org.apache.struts2.result.VelocityResult"/>
             <result-type name="xslt" class="org.apache.struts2.views.xslt.XSLTResult"/>
             <result-type name="plainText" class="org.apache.struts2.result.PlainTextResult" />
             <result-type name="postback" class="org.apache.struts2.result.PostbackResult" />
@@ -227,6 +227,7 @@
             <interceptor name="staticParams" class="com.opensymphony.xwork2.interceptor.StaticParametersInterceptor"/>
             <interceptor name="scope" class="org.apache.struts2.interceptor.ScopeInterceptor"/>
             <interceptor name="servletConfig" class="org.apache.struts2.interceptor.ServletConfigInterceptor"/>
+            <interceptor name="timer" class="com.opensymphony.xwork2.interceptor.TimerInterceptor"/>
             <interceptor name="token" class="org.apache.struts2.interceptor.TokenInterceptor"/>
             <interceptor name="tokenSession" class="org.apache.struts2.interceptor.TokenSessionStoreInterceptor"/>
             <interceptor name="validation" class="org.apache.struts2.interceptor.validation.AnnotationValidationInterceptor"/>
@@ -234,6 +235,7 @@
             <interceptor name="store" class="org.apache.struts2.interceptor.MessageStoreInterceptor" />
             <interceptor name="checkbox" class="org.apache.struts2.interceptor.CheckboxInterceptor" />
             <interceptor name="datetime" class="org.apache.struts2.interceptor.DateTextFieldInterceptor" />
+            <interceptor name="profiling" class="org.apache.struts2.interceptor.ProfilingActivationInterceptor" />
             <interceptor name="roles" class="org.apache.struts2.interceptor.RolesInterceptor" />
             <interceptor name="annotationWorkflow" class="com.opensymphony.xwork2.interceptor.annotations.AnnotationWorkflowInterceptor" />
             <interceptor name="annotationParameterFilter" class="com.opensymphony.xwork2.interceptor.annotations.AnnotationParameterFilterInterceptor" />

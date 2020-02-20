@@ -594,7 +594,8 @@ class TagFileProcessor {
                 rctxt.addWrapper(tagFileJarPath + tagFilePath, wrapper);
 
                 // Use same classloader and classpath for compiling tag files
-                wrapper.getJspEngineContext().setClassLoader(ctxt.getClassLoader());
+                wrapper.getJspEngineContext().setClassLoader(
+                        (URLClassLoader) ctxt.getClassLoader());
                 wrapper.getJspEngineContext().setClassPath(ctxt.getClassPath());
             } else {
                 // Make sure that JspCompilationContext gets the latest TagInfo

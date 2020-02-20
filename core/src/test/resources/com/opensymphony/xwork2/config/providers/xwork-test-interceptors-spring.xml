@@ -28,7 +28,7 @@
 	<include file="xwork-test-beans.xml" />
     <package name="default">
         <interceptors>
-            <interceptor name="noop" class="noop-interceptor"/>
+            <interceptor name="timer" class="timer-interceptor"/>
         </interceptors>
     </package>
 </xwork>

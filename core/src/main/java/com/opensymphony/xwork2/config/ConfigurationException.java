@@ -18,14 +18,15 @@
  */
 package com.opensymphony.xwork2.config;
 
-import org.apache.struts2.StrutsException;
+import com.opensymphony.xwork2.XWorkException;
+
 
 /**
  * ConfigurationException
  *
  * @author Jason Carreira
  */
-public class ConfigurationException extends StrutsException {
+public class ConfigurationException extends XWorkException {
 
     /**
      * Constructs a <code>ConfigurationException</code> with no detail message.
@@ -42,12 +43,12 @@ public class ConfigurationException extends StrutsException {
     public ConfigurationException(String s) {
         super(s);
     }
-
+    
     /**
      * Constructs a <code>ConfigurationException</code> with the specified
      * detail message.
      *
-     * @param s      the detail message.
+     * @param s the detail message.
      * @param target the target object
      */
     public ConfigurationException(String s, Object target) {
@@ -62,11 +63,10 @@ public class ConfigurationException extends StrutsException {
     public ConfigurationException(Throwable cause) {
         super(cause);
     }
-
+    
     /**
      * Constructs a <code>ConfigurationException</code> with no detail message.
-     *
-     * @param cause  the cause of the exception
+     * @param cause the cause of the exception
      * @param target the target object
      */
     public ConfigurationException(Throwable cause, Object target) {
@@ -77,19 +77,19 @@ public class ConfigurationException extends StrutsException {
      * Constructs a <code>ConfigurationException</code> with the specified
      * detail message.
      *
-     * @param s     the detail message.
+     * @param s the detail message.
      * @param cause the cause of the exception
      */
     public ConfigurationException(String s, Throwable cause) {
         super(s, cause);
     }
-
+    
     /**
      * Constructs a <code>ConfigurationException</code> with the specified
      * detail message.
      *
-     * @param s      the detail message.
-     * @param cause  the cause of the exception
+     * @param s the detail message.
+     * @param cause the cause of the exception
      * @param target the target object
      */
     public ConfigurationException(String s, Throwable cause, Object target) {

@@ -31,34 +31,33 @@ import com.opensymphony.xwork2.util.ValueStack;
 import com.opensymphony.xwork2.util.finder.ClassLoaderInterface;
 import com.opensymphony.xwork2.util.finder.ClassLoaderInterfaceDelegate;
 import com.opensymphony.xwork2.util.fs.DefaultFileManager;
+import com.sun.net.httpserver.HttpsParameters;
 import junit.framework.TestCase;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.struts2.dispatcher.HttpParameters;
-import org.apache.struts2.jasper.runtime.InstanceHelper;
 import org.apache.struts2.views.util.DefaultUrlHelper;
 import org.apache.struts2.views.util.UrlHelper;
-import org.apache.tomcat.InstanceManager;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
 
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
-
 
 public class EmbeddedJSPResultTest extends TestCase {
     private HttpServletRequest request;
     private MockHttpServletResponse response;
     private MockServletContext context;
-    private MockServletConfig config;
     private EmbeddedJSPResult result;
 
     public void testScriptlet() throws Exception {
@@ -232,77 +231,6 @@ public class EmbeddedJSPResultTest extends TestCase {
         assertEquals("WhoamI?", StringUtils.deleteWhitespace(response.getContentAsString()));
     }
 
-    public void testNotURLClassLoader() throws Exception {
-        ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
-        NotURLClassLoader loader = new NotURLClassLoader(parentClassLoader);
-        Thread.currentThread().setContextClassLoader(loader);
-
-        try {
-            result.setLocation("org/apache/struts2/tag0.jsp");
-            result.execute(null);
-
-            assertEquals("Thissessionisnotsecure.OtherText", StringUtils.deleteWhitespace(response.getContentAsString()));
-        } finally {
-            Thread.currentThread().setContextClassLoader(parentClassLoader);
-        }
-    }
-
-    public void testComplex() throws Exception {
-        result.setLocation("org/apache/struts2/complex0.jsp");
-        result.execute(null);
-
-        String responseString = response.getContentAsString();
-        assertNotNull("result is null?", responseString);
-        int titleIndex = responseString.indexOf("<title>Struts2 Embedded JSP Plugin - Complex Test Page</title>");
-        int responseLength = responseString.length();
-        int testValue1Index = responseString.indexOf("testvalue1 set/if worked.");
-        int testValue5Index = responseString.indexOf("testvalue5 set/if worked.");
-        int lastGroupIndex = responseString.indexOf("End include tests<br/>");
-        int lastHtmlIndex = responseString.indexOf("</html>");
-        assertTrue("Did not find title index (" + titleIndex + ") ?", titleIndex > 0);
-        assertTrue("Test value 1 not present or index (" + testValue1Index + ") not > title index (" + titleIndex + ") ?",
-                testValue1Index > titleIndex);
-        assertTrue("Test value 5 not present or index (" + testValue5Index + ") not > test value 1 index (" + testValue1Index + ") ?",
-                testValue5Index > testValue1Index);
-        assertTrue("Last group index not present or index (" + lastGroupIndex + ") not > test value 5 index (" + testValue5Index + ") ?",
-                lastGroupIndex > testValue5Index);
-        assertTrue("Last html index not present or index (" + lastHtmlIndex + ") not > last group index (" + lastGroupIndex + ") ?",
-                lastHtmlIndex > lastGroupIndex);
-        // complex0.jsp length 3439 in Windows and estimated 3221 in Linux/Unix (with 218 lines, Windows has around 218 additional
-        //   characters (crlf vs. lf).  Test length larger than the min(Windows,Linux)), rounded down to the nearest 100.
-        assertTrue("Response length (" + responseLength + ") not at least length: 3200 ?", responseLength > 3200);
-    }
-
-    public void testInstanceHelper() throws Exception {
-        InstanceManager instanceManagerServlet = InstanceHelper.getServletInstanceManager(config);
-        InstanceManager instanceManagerClassLoader = InstanceHelper.getClassLoaderInstanceManager(context.getClassLoader());
-        assertNotNull("instanceManager (servlet) is null ?", instanceManagerServlet);
-        assertNotNull("instanceManager (classloader) is null ?", instanceManagerClassLoader);
-        assertEquals("instanceManager (servlet) is not equal to instanceManager (classloader) ?", instanceManagerServlet, instanceManagerClassLoader);
-        final Double instanceDouble = new Double(0);
-        final Long instanceLong = new Long(0);
-        final Object instanceObject = new Object();
-        final String instanceString = new String("test string");
-        final MockHttpServletRequest intanceMockHttpServletRequest = new MockHttpServletRequest();
-        intanceMockHttpServletRequest.setContextPath("context path");
-        InstanceHelper.postConstruct(instanceManagerServlet, instanceDouble);
-        InstanceHelper.postConstruct(instanceManagerServlet, instanceLong);
-        InstanceHelper.postConstruct(instanceManagerServlet, instanceObject);
-        InstanceHelper.postConstruct(instanceManagerServlet, instanceString);
-        InstanceHelper.postConstruct(instanceManagerServlet, intanceMockHttpServletRequest);
-        assertEquals("test string value changed after postConstruct ?", instanceString, "test string");
-        assertEquals("mock servlet request context path value changed after postConstruct ?",
-                intanceMockHttpServletRequest.getContextPath(), "context path");
-        InstanceHelper.preDestroy(instanceManagerServlet, instanceDouble);
-        InstanceHelper.preDestroy(instanceManagerServlet, instanceLong);
-        InstanceHelper.preDestroy(instanceManagerServlet, instanceObject);
-        InstanceHelper.preDestroy(instanceManagerServlet, instanceString);
-        InstanceHelper.preDestroy(instanceManagerServlet, intanceMockHttpServletRequest);
-        assertEquals("test string value changed after preDestroy ?", instanceString, "test string");
-        assertEquals("mock servlet request context path value changed after preDestroy ?",
-                intanceMockHttpServletRequest.getContextPath(), "context path");
-    }
-
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -312,7 +240,6 @@ public class EmbeddedJSPResultTest extends TestCase {
         request = EasyMock.createNiceMock(HttpServletRequest.class);
         response = new MockHttpServletResponse();
         context = new MockServletContext();
-        config = new MockServletConfig(context);
 
         final Map params = new HashMap();
 
@@ -445,12 +372,5 @@ class CountingClassLoaderInterface extends ClassLoaderInterfaceDelegate {
         counters.put(name, counter);
 
         return super.getResourceAsStream(name);
-    }
-}
-
-class NotURLClassLoader extends ClassLoader {
-
-    NotURLClassLoader(ClassLoader parentClassLoader) {
-        super(parentClassLoader);
     }
 }

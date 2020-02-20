@@ -21,13 +21,13 @@ package org.apache.struts2.convention;
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.FileManager;
 import com.opensymphony.xwork2.FileManagerFactory;
+import com.opensymphony.xwork2.XWorkException;
 import com.opensymphony.xwork2.util.finder.ClassFinder;
 import com.opensymphony.xwork2.util.finder.ClassLoaderInterface;
 import com.opensymphony.xwork2.util.finder.Test;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.struts2.StrutsException;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -333,6 +333,23 @@ public class DefaultClassFinder implements ClassFinder {
         return classes;
     }
 
+    private static List<URL> getURLs(ClassLoaderInterface classLoader, String[] dirNames) {
+        List<URL> urls = new ArrayList<>();
+        for (String dirName : dirNames) {
+            try {
+                Enumeration<URL> classLoaderURLs = classLoader.getResources(dirName);
+                while (classLoaderURLs.hasMoreElements()) {
+                    URL url = classLoaderURLs.nextElement();
+                    urls.add(url);
+                }
+            } catch (IOException ioe) {
+                LOG.error("Could not read directory [{}]", dirName, ioe);
+            }
+        }
+
+        return urls;
+    }
+
     private List<String> file(URL location) {
         List<String> classNames = new ArrayList<>();
         File dir = new File(URLDecoder.decode(location.getPath()));
@@ -445,10 +462,10 @@ public class DefaultClassFinder implements ClassFinder {
                     classReader.accept(new InfoBuildingVisitor(this), ClassReader.SKIP_DEBUG);
                 }
             } else {
-                throw new StrutsException("Could not load " + className);
+                throw new XWorkException("Could not load " + className);
             }
         } catch (IOException e) {
-            throw new StrutsException("Could not load " + className, e);
+            throw new XWorkException("Could not load " + className, e);
         }
 
     }
@@ -458,7 +475,7 @@ public class DefaultClassFinder implements ClassFinder {
         private ClassFinder classFinder;
 
         public InfoBuildingVisitor(ClassFinder classFinder) {
-            super(Opcodes.ASM7);
+            super(Opcodes.ASM5);
             this.classFinder = classFinder;
         }
 
@@ -539,7 +556,7 @@ public class DefaultClassFinder implements ClassFinder {
         private Info info;
 
         public InfoBuildingMethodVisitor() {
-            super(Opcodes.ASM7);
+            super(Opcodes.ASM5);
         }
 
         public InfoBuildingMethodVisitor(Info info) {

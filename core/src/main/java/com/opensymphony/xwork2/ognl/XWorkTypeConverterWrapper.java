@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public class XWorkTypeConverterWrapper implements TypeConverter {
 
-    private final ognl.TypeConverter typeConverter;
+    private ognl.TypeConverter typeConverter;
     
     public XWorkTypeConverterWrapper(ognl.TypeConverter conv) {
         this.typeConverter = conv;

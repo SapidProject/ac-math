@@ -24,7 +24,7 @@ import java.util.Map;
 
 public class OgnlNullHandlerWrapper implements ognl.NullHandler {
 
-    private final NullHandler wrapped;
+    private NullHandler wrapped;
     
     public OgnlNullHandlerWrapper(NullHandler target) {
         this.wrapped = target;

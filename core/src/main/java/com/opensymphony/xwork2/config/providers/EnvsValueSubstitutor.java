@@ -18,8 +18,7 @@
  */
 package com.opensymphony.xwork2.config.providers;
 
-import org.apache.commons.text.StringSubstitutor;
-import org.apache.commons.text.lookup.StringLookupFactory;
+import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,26 +26,20 @@ public class EnvsValueSubstitutor implements ValueSubstitutor {
 
     private static final Logger LOG = LogManager.getLogger(EnvsValueSubstitutor.class);
 
-    protected StringSubstitutor envStrSubstitutor;
-    protected StringSubstitutor sysStrSubstitutor;
+    protected StrSubstitutor strSubstitutor;
 
     public EnvsValueSubstitutor() {
-        envStrSubstitutor = new StringSubstitutor(System.getenv());
-        envStrSubstitutor.setVariablePrefix("${env.");
-        envStrSubstitutor.setVariableSuffix('}');
-        envStrSubstitutor.setValueDelimiter(':');
-
-        sysStrSubstitutor = new StringSubstitutor(StringLookupFactory.INSTANCE.systemPropertyStringLookup());
-        sysStrSubstitutor.setVariablePrefix("${");
-        sysStrSubstitutor.setVariableSuffix('}');
-        sysStrSubstitutor.setValueDelimiter(':');
+        strSubstitutor = new StrSubstitutor(System.getenv());
+        strSubstitutor.setVariablePrefix("${env.");
+        strSubstitutor.setVariableSuffix('}');
+        strSubstitutor.setValueDelimiter(":");
     }
 
     @Override
     public String substitute(String value) {
         LOG.debug("Substituting value {} with proper System variable or environment variable", value);
 
-        String substituted = sysStrSubstitutor.replace(value);
-        return envStrSubstitutor.replace(substituted);
+        String substituted = StrSubstitutor.replaceSystemProperties(value);
+        return strSubstitutor.replace(substituted);
     }
 }

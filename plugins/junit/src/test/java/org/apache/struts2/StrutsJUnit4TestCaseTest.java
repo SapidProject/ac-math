@@ -18,7 +18,6 @@
  */
 package org.apache.struts2;
 
-import com.opensymphony.xwork2.ActionProxy;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -32,13 +31,6 @@ public class StrutsJUnit4TestCaseTest extends StrutsJUnit4TestCase<JUnitTestActi
     public void testExecuteActionAgainstCustomStrutsConfigFile() throws Exception {
         String output = executeAction("/test/testAction-2.action");
         Assert.assertEquals("Test-2", output);
-    }
-
-    @Test
-    public void testSessionInitialized() throws Exception {
-        ActionProxy proxy = getActionProxy("/test/testAction-2.action");
-        Assert.assertNotNull("invocation session should being initialized",
-                proxy.getInvocation().getInvocationContext().getSession());
     }
 
     @Override

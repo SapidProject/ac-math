@@ -81,7 +81,7 @@ public class JBossFileManager extends DefaultFileManager {
 
     @Override
     public void monitorFile(URL fileUrl) {
-        if (reloadingConfigs && isJBossUrl(fileUrl)) {
+        if (isJBossUrl(fileUrl)) {
             String fileName = fileUrl.toString();
             LOG.debug("Creating revision for URL: {}", fileName);
             URL normalizedUrl = normalizeToFileProtocol(fileUrl);

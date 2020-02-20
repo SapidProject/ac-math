@@ -36,12 +36,7 @@ public class LocatableConstantFactory<T> extends Located implements Factory {
     public T create(Context ignored) {
         return constant;
     }
-
-    @Override
-    public Class type() {
-        return constant.getClass();
-    }
-
+    
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

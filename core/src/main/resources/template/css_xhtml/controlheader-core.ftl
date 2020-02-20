@@ -34,7 +34,7 @@
      errorFor="${parameters.id}"<#rt/>
     </#if>
     class="errorMessage">
-             ${error}
+             ${error?html}
     </div><#t/>
 </#list>
 </div><#t/>
@@ -55,7 +55,7 @@
 <#if parameters.id??>id="wwlbl_${parameters.id}"<#rt/></#if> class="wwlbl">
     <label <#t/>
 <#if parameters.id??>
-        for="${parameters.id}" <#t/>
+        for="${parameters.id?html}" <#t/>
 </#if>
 <#if hasFieldErrors>
         class="errorLabel"<#t/>
@@ -66,7 +66,7 @@
 <#if parameters.required!false>
         <span class="required">*</span><#t/>
 </#if>
-        ${parameters.label}${parameters.labelseparator!":"}
+        ${parameters.label?html}${parameters.labelseparator!":"?html}
 <#include "/${parameters.templateDir}/xhtml/tooltip.ftl" />
 	</label><#t/>
 <#if (labelpos!"top") == 'top'>

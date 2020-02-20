@@ -29,30 +29,30 @@
 
 <br/>
 <select<#rt/>
-        name="${(parameters.doubleName!"")}"<#rt/>
+        name="${(parameters.doubleName!"")?html}"<#rt/>
 <#if parameters.disabled!false>
         disabled="disabled"<#rt/>
 </#if>
 <#if parameters.doubleTabindex?has_content>
-        tabindex="${parameters.doubleTabindex}"<#rt/>
+        tabindex="${parameters.doubleTabindex?html}"<#rt/>
 </#if>
 <#if parameters.doubleId?has_content>
-        id="${parameters.doubleId}"<#rt/>
+        id="${parameters.doubleId?html}"<#rt/>
 </#if>
 <#if parameters.doubleCss?has_content>
-        class="${parameters.doubleCss}"<#rt/>
+        class="${parameters.doubleCss?html}"<#rt/>
 </#if>
 <#if parameters.doubleStyle?has_content>
-        style="${parameters.doubleStyle}"<#rt/>
+        style="${parameters.doubleStyle?html}"<#rt/>
 </#if>
 <#if parameters.title?has_content>
-        title="${parameters.title}"<#rt/>
+        title="${parameters.title?html}"<#rt/>
 </#if>
 <#if parameters.multiple!false>
         multiple="multiple"<#rt/>
 </#if>
 <#if parameters.get("doubleSize")?has_content>
-        size="${parameters.get("doubleSize")}"<#rt/>
+        size="${parameters.get("doubleSize")?html}"<#rt/>
 </#if>
 <#if parameters.doubleMultiple!false>
         multiple="multiple"<#rt/>
@@ -63,8 +63,8 @@
         >
 </select>
 <#if parameters.doubleMultiple!false>
-<input type="hidden" id="__multiselect_${parameters.doubleId}"
-       name="__multiselect_${(parameters.doubleName!"")}" value=""<#rt/>
+<input type="hidden" id="__multiselect_${parameters.doubleId?html}"
+       name="__multiselect_${(parameters.doubleName!"")?html}" value=""<#rt/>
     <#if parameters.doubleDisabled!false>
        disabled="disabled"<#rt/>
     </#if>
@@ -132,13 +132,13 @@
         </#if>
     ${parameters.id}Group[${itemCount}][${doubleItemCount}] = new Option("${doubleItemValue?js_string}", "${doubleItemKeyStr?js_string}");
         <#if itemDoubleCssClass??>
-    ${parameters.id}Group[${itemCount}][${doubleItemCount}].setAttribute("class","${itemDoubleCssClass}");
+    ${parameters.id}Group[${itemCount}][${doubleItemCount}].setAttribute("class","${itemDoubleCssClass?html}");
         </#if>
         <#if itemDoubleCssStyle??>
-        ${parameters.id}Group[${itemCount}][${doubleItemCount}].setAttribute("style","${itemDoubleCssStyle}");
+        ${parameters.id}Group[${itemCount}][${doubleItemCount}].setAttribute("style","${itemDoubleCssStyle?html}");
         </#if>
         <#if itemDoubleTitle??>
-        ${parameters.id}Group[${itemCount}][${doubleItemCount}].setAttribute("title","${itemDoubleTitle}");
+        ${parameters.id}Group[${itemCount}][${doubleItemCount}].setAttribute("title","${itemDoubleTitle?html}");
         </#if>
 
         <#assign doubleItemCount = doubleItemCount + 1/>

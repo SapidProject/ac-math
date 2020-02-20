@@ -122,8 +122,6 @@ public abstract class StrutsResultSupport implements Result, StrutsStatics {
     /** use UTF-8 as this is the recommended encoding by W3C to avoid incompatibilities. */
     public static final String DEFAULT_URL_ENCODING = "UTF-8";
 
-    protected boolean parseLocation = true;
-
     private boolean parse;
     private boolean encode;
     private String location;
@@ -202,7 +200,7 @@ public abstract class StrutsResultSupport implements Result, StrutsStatics {
      * @throws Exception if an error occurs while executing the result.
      */
     public void execute(ActionInvocation invocation) throws Exception {
-        lastFinalLocation = parseLocation ? conditionalParse(location, invocation) : location;
+        lastFinalLocation = conditionalParse(location, invocation);
         doExecute(lastFinalLocation, invocation);
     }
 

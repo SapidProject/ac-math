@@ -194,6 +194,10 @@
         <outputDirectory>docs/struts2-plugins/struts2-rest-plugin/apidocs</outputDirectory>
       </fileSet>
       <fileSet>
+        <directory>../plugins/sitegraph/target/apidocs</directory>
+        <outputDirectory>docs/struts2-plugins/struts2-sitegraph-plugin/apidocs</outputDirectory>
+      </fileSet>
+      <fileSet>
         <directory>../plugins/sitemesh/target/apidocs</directory>
         <outputDirectory>docs/struts2-plugins/struts2-sitemesh-plugin/apidocs</outputDirectory>
       </fileSet>
@@ -208,10 +212,6 @@
       <fileSet>
         <directory>../plugins/tiles/target/apidocs</directory>
         <outputDirectory>docs/struts2-plugins/struts2-tiles-plugin/apidocs</outputDirectory>
-      </fileSet>
-      <fileSet>
-        <directory>../plugins/velocity/target/apidocs</directory>
-        <outputDirectory>docs/struts2-plugins/struts2-velocity-plugin/apidocs</outputDirectory>
       </fileSet>
 
     <!-- bundles -->

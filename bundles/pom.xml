@@ -29,7 +29,7 @@
 
     <artifactId>struts2-osgi-bundles</artifactId>
     <packaging>pom</packaging>
-    <name>Struts 2 OSGi Bundles</name>
+    <name>Struts OSGi Bundles</name>
 
     <modules>
         <module>admin</module>
@@ -64,8 +64,9 @@
     <reporting>
         <plugins>
             <plugin>
-                <groupId>org.apache.rat</groupId>
-                <artifactId>apache-rat-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>rat-maven-plugin</artifactId>
+                <version>1.0-alpha-2</version>
                 <configuration>
                     <includes>
                         <include>pom.xml</include>

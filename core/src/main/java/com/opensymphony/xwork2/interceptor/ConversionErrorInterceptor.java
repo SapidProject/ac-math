@@ -20,10 +20,9 @@ package com.opensymphony.xwork2.interceptor;
 
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionInvocation;
-import com.opensymphony.xwork2.conversion.impl.ConversionData;
 import com.opensymphony.xwork2.conversion.impl.XWorkConverter;
 import com.opensymphony.xwork2.util.ValueStack;
-import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -101,17 +100,17 @@ public class ConversionErrorInterceptor extends MethodFilterInterceptor {
     public String doIntercept(ActionInvocation invocation) throws Exception {
 
         ActionContext invocationContext = invocation.getInvocationContext();
-        Map<String, ConversionData> conversionErrors = invocationContext.getConversionErrors();
+        Map<String, Object> conversionErrors = invocationContext.getConversionErrors();
         ValueStack stack = invocationContext.getValueStack();
 
         HashMap<Object, Object> fakie = null;
 
-        for (Map.Entry<String, ConversionData> entry : conversionErrors.entrySet()) {
+        for (Map.Entry<String, Object> entry : conversionErrors.entrySet()) {
             String propertyName = entry.getKey();
-            ConversionData conversionData = entry.getValue();
+            Object value = entry.getValue();
 
-            if (shouldAddError(propertyName, conversionData.getValue())) {
-                String message = XWorkConverter.getConversionErrorMessage(propertyName, conversionData.getToClass(), stack);
+            if (shouldAddError(propertyName, value)) {
+                String message = XWorkConverter.getConversionErrorMessage(propertyName, stack);
 
                 Object action = invocation.getAction();
                 if (action instanceof ValidationAware) {
@@ -123,7 +122,7 @@ public class ConversionErrorInterceptor extends MethodFilterInterceptor {
                     fakie = new HashMap<>();
                 }
 
-                fakie.put(propertyName, getOverrideExpr(invocation, conversionData.getValue()));
+                fakie.put(propertyName, getOverrideExpr(invocation, value));
             }
         }
 

@@ -31,6 +31,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.struts2.RequestUtils;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.StrutsConstants;
+import org.apache.struts2.StrutsException;
 import org.apache.struts2.util.PrefixTrie;
 
 import javax.servlet.http.HttpServletRequest;
@@ -116,10 +117,6 @@ public class DefaultActionMapper implements ActionMapper {
     protected boolean allowSlashesInActionNames = false;
     protected boolean alwaysSelectFullNamespace = false;
     protected PrefixTrie prefixTrie = null;
-
-    protected Pattern allowedNamespaceNames = Pattern.compile("[a-zA-Z0-9._/\\-]*");
-    protected String defaultNamespaceName = "/";
-
     protected Pattern allowedActionNames = Pattern.compile("[a-zA-Z0-9._!/\\-]*");
     protected String defaultActionName = "index";
 
@@ -203,16 +200,6 @@ public class DefaultActionMapper implements ActionMapper {
     @Inject(StrutsConstants.STRUTS_ALWAYS_SELECT_FULL_NAMESPACE)
     public void setAlwaysSelectFullNamespace(String alwaysSelectFullNamespace) {
         this.alwaysSelectFullNamespace = BooleanUtils.toBoolean(alwaysSelectFullNamespace);
-    }
-
-    @Inject(value = StrutsConstants.STRUTS_ALLOWED_NAMESPACE_NAMES, required = false)
-    public void setAllowedNamespaceNames(String allowedNamespaceNames) {
-        this.allowedNamespaceNames = Pattern.compile(allowedNamespaceNames);
-    }
-
-    @Inject(value = StrutsConstants.STRUTS_DEFAULT_NAMESPACE_NAME, required = false)
-    public void setDefaultNamespaceName(String defaultNamespaceName) {
-        this.defaultNamespaceName = defaultNamespaceName;
     }
 
     @Inject(value = StrutsConstants.STRUTS_ALLOWED_ACTION_NAMES, required = false)
@@ -402,26 +389,8 @@ public class DefaultActionMapper implements ActionMapper {
             }
         }
 
-        mapping.setNamespace(cleanupNamespaceName(namespace));
+        mapping.setNamespace(namespace);
         mapping.setName(cleanupActionName(name));
-    }
-
-    /**
-     * Checks namespace name against allowed pattern if not matched returns default namespace
-     *
-     * @param rawNamespace name extracted from URI
-     * @return safe namespace name
-     */
-    protected String cleanupNamespaceName(final String rawNamespace) {
-        if (allowedNamespaceNames.matcher(rawNamespace).matches()) {
-            return rawNamespace;
-        } else {
-            LOG.warn(
-                "{} did not match allowed namespace names {} - default namespace {} will be used!",
-                rawNamespace, allowedNamespaceNames, defaultNamespaceName
-            );
-            return defaultNamespaceName;
-        }
     }
 
     /**

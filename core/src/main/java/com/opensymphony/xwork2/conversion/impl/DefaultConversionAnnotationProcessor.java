@@ -26,7 +26,6 @@ import com.opensymphony.xwork2.conversion.annotations.ConversionRule;
 import com.opensymphony.xwork2.conversion.annotations.ConversionType;
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 import com.opensymphony.xwork2.inject.Inject;
-import com.opensymphony.xwork2.util.ClassLoaderUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -70,7 +69,7 @@ public class DefaultConversionAnnotationProcessor implements ConversionAnnotatio
                     mapping.put(key, tc.value());
                 }
                 //for properties of classes
-                else if (tc.rule() != ConversionRule.ELEMENT && tc.rule() != ConversionRule.KEY && tc.rule() != ConversionRule.COLLECTION) {
+                else if (tc.rule() != ConversionRule.ELEMENT || tc.rule() == ConversionRule.KEY || tc.rule() == ConversionRule.COLLECTION) {
                     if (StringUtils.isNoneEmpty(tc.converter())) {
                         mapping.put(key, converterCreator.createTypeConverter(tc.converter()));
                     } else {
@@ -81,22 +80,18 @@ public class DefaultConversionAnnotationProcessor implements ConversionAnnotatio
                 else if (tc.rule() == ConversionRule.KEY) {
                     Class<?> converterClass;
                     if (StringUtils.isNoneEmpty(tc.converter())) {
-                        converterClass = ClassLoaderUtil.loadClass(tc.converter(), this.getClass());
+                        converterClass = Thread.currentThread().getContextClassLoader().loadClass(tc.converter());
+                        //check if the converter is a type converter if it is one
+                        //then just put it in the map as is. Otherwise
+                        //put a value in for the type converter of the class
                     } else {
                         converterClass = tc.converterClass();
                     }
 
                     LOG.debug("Converter class: [{}]", converterClass);
 
-                    //check if the converter is a type converter if it is one
-                    //then just put it in the map as is. Otherwise
-                    //put a value in for the type converter of the class
                     if (converterClass.isAssignableFrom(TypeConverter.class)) {
-                        if (StringUtils.isNoneEmpty(tc.converter())) {
-                            mapping.put(key, converterCreator.createTypeConverter(tc.converter()));
-                        } else {
-                            mapping.put(key, converterCreator.createTypeConverter(tc.converterClass()));
-                        }
+                        mapping.put(key, converterCreator.createTypeConverter(tc.converter()));
                     } else {
                         mapping.put(key, converterClass);
                         LOG.debug("Object placed in mapping for key [{}] is [{}]", key, mapping.get(key));
@@ -105,7 +100,7 @@ public class DefaultConversionAnnotationProcessor implements ConversionAnnotatio
                 //elements(values) of maps / lists
                 else {
                     if (StringUtils.isNoneEmpty(tc.converter())) {
-                        mapping.put(key, ClassLoaderUtil.loadClass(tc.converter(), this.getClass()));
+                        mapping.put(key, Thread.currentThread().getContextClassLoader().loadClass(tc.converter()));
                     } else {
                         mapping.put(key, tc.converterClass());
                     }

@@ -456,7 +456,7 @@ public class JSONResult implements Result {
         return defaultDateFormat;
     }
 
-    @Inject(required = false, value = JSONConstants.DATE_FORMAT)
+    @Inject(required=false,value="struts.json.dateformat")
     public void setDefaultDateFormat(String defaultDateFormat) {
         this.defaultDateFormat = defaultDateFormat;
     }

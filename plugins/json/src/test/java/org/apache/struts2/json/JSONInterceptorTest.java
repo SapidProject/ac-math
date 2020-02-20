@@ -93,6 +93,9 @@ public class JSONInterceptorTest extends StrutsTestCase {
         this.request.addHeader("Content-Type", "application/json-rpc");
 
         JSONInterceptor interceptor = new JSONInterceptor();
+        JSONUtil jsonUtil = new JSONUtil();
+        jsonUtil.setWriter(new DefaultJSONWriter());
+        interceptor.setJsonUtil(jsonUtil);
         SMDActionTest1 action = new SMDActionTest1();
 
         this.invocation.setAction(action);
@@ -113,6 +116,9 @@ public class JSONInterceptorTest extends StrutsTestCase {
 
         JSONInterceptor interceptor = new JSONInterceptor();
         interceptor.setEnableSMD(true);
+        JSONUtil jsonUtil = new JSONUtil();
+        jsonUtil.setWriter(new DefaultJSONWriter());
+        interceptor.setJsonUtil(jsonUtil);
         SMDActionTest2 action = new SMDActionTest2();
 
         this.invocation.setAction(action);
@@ -131,6 +137,9 @@ public class JSONInterceptorTest extends StrutsTestCase {
 
         JSONInterceptor interceptor = new JSONInterceptor();
         interceptor.setEnableSMD(true);
+        JSONUtil jsonUtil = new JSONUtil();
+        jsonUtil.setWriter(new DefaultJSONWriter());
+        interceptor.setJsonUtil(jsonUtil);
         SMDActionTest2 action = new SMDActionTest2();
 
         this.invocation.setAction(action);
@@ -149,6 +158,9 @@ public class JSONInterceptorTest extends StrutsTestCase {
 
         JSONInterceptor interceptor = new JSONInterceptor();
         interceptor.setEnableSMD(true);
+        JSONUtil jsonUtil = new JSONUtil();
+        jsonUtil.setWriter(new DefaultJSONWriter());
+        interceptor.setJsonUtil(jsonUtil);
         SMDActionTest1 action = new SMDActionTest1();
 
         this.invocation.setAction(action);
@@ -194,6 +206,9 @@ public class JSONInterceptorTest extends StrutsTestCase {
 
         JSONInterceptor interceptor = new JSONInterceptor();
         interceptor.setEnableSMD(true);
+        JSONUtil jsonUtil = new JSONUtil();
+        jsonUtil.setWriter(new DefaultJSONWriter());
+        interceptor.setJsonUtil(jsonUtil);
         SMDActionTest1 action = new SMDActionTest1();
 
         this.invocation.setAction(action);
@@ -229,6 +244,9 @@ public class JSONInterceptorTest extends StrutsTestCase {
 
         JSONInterceptor interceptor = new JSONInterceptor();
         interceptor.setEnableSMD(true);
+        JSONUtil jsonUtil = new JSONUtil();
+        jsonUtil.setWriter(new DefaultJSONWriter());
+        interceptor.setJsonUtil(jsonUtil);
         SMDActionTest2 action = new SMDActionTest2();
 
         this.invocation.setAction(action);
@@ -254,6 +272,9 @@ public class JSONInterceptorTest extends StrutsTestCase {
 
         JSONInterceptor interceptor = new JSONInterceptor();
         interceptor.setEnableSMD(true);
+        JSONUtil jsonUtil = new JSONUtil();
+        jsonUtil.setWriter(new DefaultJSONWriter());
+        interceptor.setJsonUtil(jsonUtil);
         SMDActionTest1 action = new SMDActionTest1();
 
         this.invocation.setAction(action);

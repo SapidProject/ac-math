@@ -33,7 +33,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.directwebremoting</groupId>
+            <groupId>uk.ltd.getahead</groupId>
             <artifactId>dwr</artifactId>
         </dependency>
     </dependencies>

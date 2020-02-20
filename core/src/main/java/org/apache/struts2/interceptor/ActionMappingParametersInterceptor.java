@@ -74,8 +74,6 @@ import java.util.Map;
 public class ActionMappingParametersInterceptor extends ParametersInterceptor {
 
     /**
-     * Get the parameter map from ActionMapping associated with the provided ActionContext.
-     * 
      * @param ac The action context
      * @return the parameters from the action mapping in the context.  If none found, returns an empty map.
      */
@@ -83,25 +81,27 @@ public class ActionMappingParametersInterceptor extends ParametersInterceptor {
     protected HttpParameters retrieveParameters(ActionContext ac) {
         ActionMapping mapping = (ActionMapping) ac.get(ServletActionContext.ACTION_MAPPING);
         if (mapping != null) {
-            return HttpParameters.create(mapping.getParams()).buildNoNestedWrapping();
+            return HttpParameters.create(mapping.getParams()).build();
         } else {
-            return HttpParameters.create().buildNoNestedWrapping();
+            return HttpParameters.create().build();
         }
     }
 
     /**
-     * Adds the parameters into the current ActionContext's parameter map.
-     *
-     * Note: The method should avoid re-wrapping values which are already of type Parameter.
+     * Adds the parameters into context's ParameterMap
      *
      * @param ac        The action context
      * @param newParams The parameter map to apply
+     *                  <p>
+     *                  In this class this is a no-op, since the parameters were fetched from the same location.
+     *                  In subclasses both retrieveParameters() and addParametersToContext() should be overridden.
+     *                  </p>
      */
     @Override
     protected void addParametersToContext(ActionContext ac, Map<String, ?> newParams) {
         HttpParameters previousParams = ac.getParameters();
         HttpParameters.Builder combinedParams = HttpParameters.create().withParent(previousParams).withExtraParams(newParams);
 
-        ac.setParameters(combinedParams.buildNoNestedWrapping());
+        ac.setParameters(combinedParams.build());
     }
 }

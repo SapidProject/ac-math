@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Array;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -71,28 +70,28 @@ public abstract class ListUIBean extends UIBean {
 
         if (list instanceof String) {
             value = findValue((String) list);
-            if (value == null) {
-                if (throwExceptionOnNullValueAttribute) {
-                    // will throw an exception if not found
-                    value = findValue((list == null) ? (String) list : list.toString(), "list",
-                            "The requested list key '" + list + "' could not be resolved as a collection/array/map/enumeration/iterator type. " +
-                                    "Example: people or people.{name}");
-                } else {
-                    // ww-1010, allows value with null value to be compatible with ww
-                    // 2.1.7 behaviour
-                    value = findValue((list == null) ? (String) list : list.toString());
-                }
-            }
-        } else {
+        } else if (list instanceof Collection) {
             value = list;
+        } else if (MakeIterator.isIterable(list)) {
+            value = MakeIterator.convert(list);
+        }
+        if (value == null) {
+            if (throwExceptionOnNullValueAttribute) {
+                // will throw an exception if not found
+                value = findValue((list == null) ? (String) list : list.toString(), "list",
+                        "The requested list key '" + list + "' could not be resolved as a collection/array/map/enumeration/iterator type. " +
+                                "Example: people or people.{name}");
+            } else {
+                // ww-1010, allows value with null value to be compatible with ww
+                // 2.1.7 behaviour
+                value = findValue((list == null) ? (String) list : list.toString());
+            }
         }
 
-        if (value == null || value instanceof Iterable) {
+        if (value instanceof Collection) {
             addParameter("list", value);
-        } else if (MakeIterator.isIterable(value)) {
-            addParameter("list", MakeIterator.convert(value));
         } else {
-            addParameter("list", Collections.singletonList(value));
+            addParameter("list", MakeIterator.convert(value));
         }
 
         if (value instanceof Collection) {
@@ -108,8 +107,6 @@ public abstract class ListUIBean extends UIBean {
             addParameter("listKey", listKey);
         } else if (value instanceof Map) {
             addParameter("listKey", "key");
-        } else {
-            addParameter("listKey", "top");
         }
 
         if (listValueKey != null) {
@@ -122,8 +119,6 @@ public abstract class ListUIBean extends UIBean {
             addParameter("listValue", listValue);
         } else if (value instanceof Map) {
             addParameter("listValue", "value");
-        } else {
-            addParameter("listValue", "top");
         }
 
         if (listLabelKey != null) {

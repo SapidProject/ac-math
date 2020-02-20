@@ -22,7 +22,6 @@ import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.TextProviderFactory;
 import com.opensymphony.xwork2.XWorkTestCase;
-import com.opensymphony.xwork2.conversion.impl.ConversionData;
 import com.opensymphony.xwork2.mock.MockActionInvocation;
 import com.opensymphony.xwork2.util.ValueStack;
 import com.opensymphony.xwork2.validator.validators.RepopulateConversionErrorFieldValidatorSupport;
@@ -92,9 +91,9 @@ public class RepopulateConversionErrorFieldValidatorSupportTest extends XWorkTes
 		ActionContext.getContext().setActionInvocation(invocation);
 		
 		String[] conversionErrorValue = new String[] { "some value" };
-		Map<String, ConversionData> conversionErrors = ActionContext.getContext().getConversionErrors();
-		conversionErrors.put("someFieldName", new ConversionData(conversionErrorValue, Integer.class));
-		conversionErrors.put("xxxsomeFieldName", new ConversionData(conversionErrorValue, Integer.class));
+		Map<String, Object> conversionErrors = ActionContext.getContext().getConversionErrors();
+		conversionErrors.put("someFieldName", conversionErrorValue);
+		conversionErrors.put("xxxsomeFieldName", conversionErrorValue);
 
 		TextProviderFactory tpf = container.getInstance(TextProviderFactory.class);
 

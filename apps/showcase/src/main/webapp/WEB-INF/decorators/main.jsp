@@ -107,7 +107,7 @@
 
         <div id="navbar" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li><s:a value="%{home}" escapeHtmlBody="false"><i class="glyphicon glyphicon-home"></i> Home</s:a></li>
+                    <li><s:a value="%{home}"><i class="glyphicon glyphicon-home"></i> Home</s:a></li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="glyphicon glyphicon-cog"></i> Configuration
@@ -201,7 +201,6 @@
                         <ul class="dropdown-menu" role="menu">
                             <s:url var="quizBasic" namespace="/validation" action="quizBasic" method="input"/>
                             <s:url var="quizClient" namespace="/validation" action="quizClient" method="input"/>
-                            <s:url var="quizDwr" namespace="/validation" action="quizDwr" method="input"/>
                             <s:url var="quizClientCss" namespace="/validation" action="quizClientCss" method="input"/>
                             <s:url var="fieldValidatorUrl" action="showFieldValidatorsExamples" namespace="/validation"/>
                             <s:url var="nonFieldValidatorUrl" action="showNonFieldValidatorsExamples" namespace="/validation"/>
@@ -217,7 +216,6 @@
                             <li><s:a href="%{storeMessageAcrossRequestExample}">Store across request using MessageStoreInterceptor (Example)</s:a></li>
                             <li><s:a href="%{quizBasic}">Validation (basic)</s:a></li>
                             <li><s:a href="%{quizClient}">Validation (client)</s:a></li>
-                            <li><s:a href="%{quizDwr}">Validation (DWR)</s:a></li>
                             <li><s:a href="%{quizClientCss}">Validation (client using css_xhtml theme)</s:a></li>
                             <li><s:a href="%{visitorValidatorUrl}">Visitor Validator</s:a></li>
                             <li><s:a href="%{ajaxFormSubmitUrl}">AJAX Form Submit</s:a></li>
@@ -233,11 +231,10 @@
                             </li>
                             <li><s:a value="/person/index.html">Person Manager</s:a></li>
                             <li><s:a value="/skill/index.html">CRUD</s:a></li>
-                            <li><s:a value="/wait/index.html" escapeHtmlBody="false">Execute &amp; Wait</s:a></li>
+                            <li><s:a value="/wait/index.html">Execute &amp; Wait</s:a></li>
                             <li><s:a value="/token/index.html">Token</s:a></li>
                             <li><s:url var="url" namespace="/modelDriven" action="modelDriven"/><s:a
                                     href="%{url}">Model Driven</s:a></li>
-                            <li><s:a value="/async/index.html">Async</s:a></li>
                         </ul>
                     </li>
                     <li class="dropdown">

@@ -26,7 +26,7 @@ import java.util.List;
  * @author $Author$
  * @version $Revision$
  */
-public class Cat implements Animal {
+public class Cat {
 
     public static final String SCIENTIFIC_NAME = "Feline";
 

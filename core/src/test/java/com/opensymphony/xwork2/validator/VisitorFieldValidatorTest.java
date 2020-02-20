@@ -20,8 +20,6 @@ package com.opensymphony.xwork2.validator;
 
 import com.opensymphony.xwork2.*;
 import com.opensymphony.xwork2.config.entities.ActionConfig;
-import com.opensymphony.xwork2.conversion.impl.ConversionData;
-
 import org.easymock.EasyMock;
 
 import java.util.*;
@@ -179,8 +177,8 @@ public class VisitorFieldValidatorTest extends XWorkTestCase {
 
     public void testVisitorChildConversionValidation() throws Exception {
         //add conversion error
-        Map<String, ConversionData> conversionErrors = new HashMap<>();
-        conversionErrors.put("bean.child.count", new ConversionData("bar", Integer.class));
+        Map<String, Object> conversionErrors = new HashMap<>();
+        conversionErrors.put("bean.child.count", "bar");
         ActionContext.getContext().setConversionErrors(conversionErrors);
 
         validate("visitorChildValidation");

@@ -69,7 +69,6 @@ public class Anchor extends ClosingUIBean {
     protected UrlProvider urlProvider;
     protected UrlRenderer urlRenderer;
     protected boolean processingTagBody = false;
-    protected boolean escapeHtmlBody = true;
     
     //these params are passed by the Param tag
     protected Map urlParameters = new LinkedHashMap();
@@ -81,48 +80,32 @@ public class Anchor extends ClosingUIBean {
         urlProvider.setHttpServletResponse(response);
     }
 
-    @Override
     public String getDefaultOpenTemplate() {
         return OPEN_TEMPLATE;
     }
 
-    @Override
     protected String getDefaultTemplate() {
         return TEMPLATE;
     }
 
-    @Override
     public boolean usesBody() {
         return true;
-    }
-
-    /**
-     * Override to set if body content should be HTML-escaped.
-     * 
-     * @return true if body should be HTML-escaped, false otherwise.
-     * 
-     * @since 2.6
-     */
-    @Override
-    public boolean escapeHtmlBody() {
-        return escapeHtmlBody;
     }
 
     @Override
     protected void evaluateExtraParams() {
         super.evaluateExtraParams();
 
-        if (href != null) {
+        if (href != null)
             addParameter("href", ensureAttributeSafelyNotEscaped(findString(href)));
-        } else {
+        else {
             //no href, build it from URL attributes
             StringWriter sw = new StringWriter();
             urlRenderer.beforeRenderUrl(urlProvider);
             urlRenderer.renderUrl(sw, urlProvider);
             String builtHref = sw.toString();
-            if (StringUtils.isNotEmpty(builtHref)) {
+            if (StringUtils.isNotEmpty(builtHref))
                 addParameter("href", ensureAttributeSafelyNotEscaped(builtHref));
-            }
         }
     }
 
@@ -132,10 +115,10 @@ public class Anchor extends ClosingUIBean {
     }
 
     @Inject
-    public void setUrlRenderer(UrlRenderer urlRenderer) {
-        urlProvider.setUrlRenderer(urlRenderer);
+	public void setUrlRenderer(UrlRenderer urlRenderer) {
+		urlProvider.setUrlRenderer(urlRenderer);
         this.urlRenderer = urlRenderer;
-    }
+	}
 
     @Inject(required=false)
     public void setExtraParameterProvider(ExtraParameterProvider provider) {
@@ -152,7 +135,6 @@ public class Anchor extends ClosingUIBean {
     /**
      * Overrides to be able to render body in a template rather than always before the template
      */
-    @Override
     public boolean end(Writer writer, String body) {
         this.processingTagBody = false;
         evaluateParams();
@@ -161,14 +143,15 @@ public class Anchor extends ClosingUIBean {
             mergeTemplate(writer, buildTemplateName(template, getDefaultTemplate()));
         } catch (Exception e) {
             LOG.error("error when rendering", e);
-        } finally {
+        }
+        finally {
             popComponentStack();
         }
 
         return false;
     }
 
-    @Override
+
     public void addParameter(String key, Object value) {
         /*
           the parameters added by this method are used in the template. this method is also
@@ -177,9 +160,8 @@ public class Anchor extends ClosingUIBean {
          */
         if (processingTagBody) {
             this.urlParameters.put(key, value);
-        } else {
+        } else
             super.addParameter(key, value);
-        }
     }
 
     @Override
@@ -191,9 +173,8 @@ public class Anchor extends ClosingUIBean {
          */
         if (processingTagBody) {
             this.urlParameters.putAll(params);
-        } else {
+        } else
             super.addAllParameters(params);
-        }
     }
 
     public UrlProvider getUrlProvider() {
@@ -215,7 +196,6 @@ public class Anchor extends ClosingUIBean {
         urlProvider.setScheme(scheme);
     }
 
-    @Override
     @StrutsTagAttribute(description = "The target value to use, if not using action")
     public void setValue(String value) {
         urlProvider.setValue(value);
@@ -274,10 +254,5 @@ public class Anchor extends ClosingUIBean {
     @StrutsTagAttribute(description = "Specifies whether to force the addition of scheme, host and port or not", type = "Boolean", defaultValue = "false")
     public void setForceAddSchemeHostAndPort(boolean forceAddSchemeHostAndPort) {
         urlProvider.setForceAddSchemeHostAndPort(forceAddSchemeHostAndPort);
-    }
-
-    @StrutsTagAttribute(required = false, description = "Specifies whether to HTML-escape the tag body or not", type = "Boolean", defaultValue = "true")
-    public void setEscapeHtmlBody(boolean escapeHtmlBody) {
-        this.escapeHtmlBody = escapeHtmlBody;
     }
 }

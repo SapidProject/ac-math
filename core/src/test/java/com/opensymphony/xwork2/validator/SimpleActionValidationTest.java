@@ -226,12 +226,6 @@ public class SimpleActionValidationTest extends XWorkTestCase {
         }
     }
 
-    public void testInitializable() throws Exception {
-        ValidatorFactory validatorFactory = container.getInstance(ValidatorFactory.class);
-        assertEquals("com.opensymphony.xwork2.validator.validators.RequiredFieldValidator",
-                validatorFactory.lookupRegisteredValidatorType("requiredAnother"));
-    }
-
     @Override
     protected void setUp() throws Exception {
         super.setUp();

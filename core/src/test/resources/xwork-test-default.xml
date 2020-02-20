@@ -33,6 +33,7 @@
         </result-types>
 
         <interceptors>
+            <interceptor name="timer" class="com.opensymphony.xwork2.interceptor.TimerInterceptor"/>
             <interceptor name="logger" class="com.opensymphony.xwork2.interceptor.LoggingInterceptor"/>
             <interceptor name="chain" class="com.opensymphony.xwork2.interceptor.ChainingInterceptor"/>
             <interceptor name="params" class="com.opensymphony.xwork2.interceptor.ParametersInterceptor"/>
@@ -52,6 +53,7 @@
             </interceptor-stack>
 
             <interceptor-stack name="debugStack">
+                <interceptor-ref name="timer"/>
                 <interceptor-ref name="logger"/>
             </interceptor-stack>
         </interceptors>

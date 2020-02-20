@@ -24,16 +24,14 @@ import com.opensymphony.xwork2.config.entities.ActionConfig;
 import com.opensymphony.xwork2.config.entities.InterceptorConfig;
 import com.opensymphony.xwork2.config.entities.ResultConfig;
 import com.opensymphony.xwork2.inject.ContainerBuilder;
-import com.opensymphony.xwork2.inject.Inject;
 import com.opensymphony.xwork2.interceptor.Interceptor;
 import com.opensymphony.xwork2.interceptor.ModelDrivenInterceptor;
-import com.opensymphony.xwork2.mock.DummyTextProvider;
+import com.opensymphony.xwork2.interceptor.TimerInterceptor;
 import com.opensymphony.xwork2.test.StubConfigurationProvider;
 import com.opensymphony.xwork2.util.location.LocatableProperties;
 import com.opensymphony.xwork2.validator.Validator;
 import com.opensymphony.xwork2.validator.validators.ExpressionValidator;
 import com.opensymphony.xwork2.validator.validators.RequiredStringValidator;
-import org.apache.struts2.interceptor.NoOpInterceptor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator;
 import org.springframework.aop.interceptor.DebugInterceptor;
@@ -47,10 +45,16 @@ import org.springframework.context.support.StaticApplicationContext;
 import java.util.HashMap;
 import java.util.Map;
 
+// TODO: Document properly
+
+/**
+ * @author Simon Stewart
+ */
 public class SpringObjectFactoryTest extends XWorkTestCase {
 
-    private StaticApplicationContext sac;
-    private SpringObjectFactory objectFactory;
+    StaticApplicationContext sac;
+    SpringObjectFactory objectFactory;
+
 
     @Override
     public void setUp() throws Exception {
@@ -66,7 +70,6 @@ public class SpringObjectFactoryTest extends XWorkTestCase {
                 // No registered beans during initialization; They will be registered in each test, runtime.
                 props.setProperty("applicationContextPath", "com/opensymphony/xwork2/spring/emptyContext-spring.xml");
 
-                builder.factory(TextProvider.class, DummyTextProvider.class);
                 builder.factory(ObjectFactory.class, SpringObjectFactory.class);
             }
             
@@ -123,12 +126,12 @@ public class SpringObjectFactoryTest extends XWorkTestCase {
     }
 
     public void testObtainInterceptorBySpringName() throws Exception {
-        sac.registerSingleton("noop-interceptor", NoOpInterceptor.class, new MutablePropertyValues());
+        sac.registerSingleton("timer-interceptor", TimerInterceptor.class, new MutablePropertyValues());
 
-        InterceptorConfig iConfig = new InterceptorConfig.Builder("noop", "noop-interceptor").build();
+        InterceptorConfig iConfig = new InterceptorConfig.Builder("timer", "timer-interceptor").build();
         Interceptor interceptor = objectFactory.buildInterceptor(iConfig, new HashMap<String, String>());
 
-        assertEquals(NoOpInterceptor.class, interceptor.getClass());
+        assertEquals(TimerInterceptor.class, interceptor.getClass());
     }
 
     public void testObtainResultBySpringName() throws Exception {
@@ -225,7 +228,7 @@ public class SpringObjectFactoryTest extends XWorkTestCase {
     }
 
     public void testShouldUseConstructorBasedInjectionWhenCreatingABeanFromAClassName() throws Exception {
-        SpringObjectFactory factory = objectFactory;
+        SpringObjectFactory factory = (SpringObjectFactory) objectFactory;
         objectFactory.setAlwaysRespectAutowireStrategy(false);
         sac.registerSingleton("actionBean", SimpleAction.class, new MutablePropertyValues());
 
@@ -307,31 +310,6 @@ public class SpringObjectFactoryTest extends XWorkTestCase {
         assertNotNull("Bean should not be null", action);
         System.out.println("Action class is: " + action.getClass().getName());
         assertTrue("Action should have been advised", action instanceof Advised);
-    }
-
-    public void testInjectingInternalStrutsBeans() throws Exception {
-        sac.registerPrototype("injectable", InternalBeansInjectable.class, new MutablePropertyValues());
-
-        InternalBeansInjectable action = (InternalBeansInjectable) objectFactory.buildBean("injectable", null, true);
-
-        assertNotNull("TextProvider should be injected by internal DI", action.getTextProvider());
-    }
-
-    public static class InternalBeansInjectable {
-
-        private TextProvider textProvider;
-
-        public InternalBeansInjectable() {
-        }
-
-        public TextProvider getTextProvider() {
-            return textProvider;
-        }
-
-        @Inject
-        public void setTextProvider(TextProvider textProvider) {
-            this.textProvider = textProvider;
-        }
     }
 
     public static class ConstructorBean {

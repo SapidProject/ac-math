@@ -32,7 +32,7 @@ import org.apache.struts2.dispatcher.HttpParameters;
 import org.apache.struts2.dispatcher.RequestMap;
 import org.apache.struts2.dispatcher.SessionMap;
 
-import org.directwebremoting.WebContextFactory;
+import uk.ltd.getahead.dwr.WebContextFactory;
 
 import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionProxy;

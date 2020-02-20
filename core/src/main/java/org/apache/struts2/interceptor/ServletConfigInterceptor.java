@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts2.StrutsStatics;
-import org.apache.struts2.action.ParametersAware;
 import org.apache.struts2.interceptor.servlet.ServletPrincipalProxy;
 import org.apache.struts2.util.ServletContextAware;
 
@@ -104,7 +103,7 @@ import com.opensymphony.xwork2.interceptor.AbstractInterceptor;
  * @see ServletRequestAware
  * @see ServletResponseAware
  * @see ParameterAware
- * @see ParametersAware
+ * @see HttpParametersAware
  * @see SessionAware
  * @see ApplicationAware
  * @see PrincipalAware
@@ -129,19 +128,9 @@ public class ServletConfigInterceptor extends AbstractInterceptor implements Str
             ((ServletRequestAware) action).setServletRequest(request);
         }
 
-        if (action instanceof org.apache.struts2.action.ServletRequestAware) {
-            HttpServletRequest request = (HttpServletRequest) context.get(HTTP_REQUEST);
-            ((org.apache.struts2.action.ServletRequestAware) action).withServletRequest(request);
-        }
-
         if (action instanceof ServletResponseAware) {
             HttpServletResponse response = (HttpServletResponse) context.get(HTTP_RESPONSE);
             ((ServletResponseAware) action).setServletResponse(response);
-        }
-
-        if (action instanceof org.apache.struts2.action.ServletResponseAware) {
-            HttpServletResponse response = (HttpServletResponse) context.get(HTTP_RESPONSE);
-            ((org.apache.struts2.action.ServletResponseAware) action).withServletResponse(response);
         }
 
         if (action instanceof ParameterAware) {
@@ -152,26 +141,14 @@ public class ServletConfigInterceptor extends AbstractInterceptor implements Str
             ((HttpParametersAware) action).setParameters(context.getParameters());
         }
 
-        if (action instanceof ParametersAware) {
-            ((ParametersAware) action).withParameters(context.getParameters());
-        }
-
         if (action instanceof ApplicationAware) {
             ((ApplicationAware) action).setApplication(context.getApplication());
         }
         
-        if (action instanceof org.apache.struts2.action.ApplicationAware) {
-            ((org.apache.struts2.action.ApplicationAware) action).withApplication(context.getApplication());
-        }
-
         if (action instanceof SessionAware) {
             ((SessionAware) action).setSession(context.getSession());
         }
         
-        if (action instanceof org.apache.struts2.action.SessionAware) {
-            ((org.apache.struts2.action.SessionAware) action).withSession(context.getSession());
-        }
-
         if (action instanceof RequestAware) {
             ((RequestAware) action).setRequest((Map) context.get("request"));
         }
@@ -183,25 +160,10 @@ public class ServletConfigInterceptor extends AbstractInterceptor implements Str
                 ((PrincipalAware) action).setPrincipalProxy(new ServletPrincipalProxy(request));
             }
         }
-
-        if (action instanceof org.apache.struts2.action.PrincipalAware) {
-            HttpServletRequest request = (HttpServletRequest) context.get(HTTP_REQUEST);
-            if(request != null) {
-                // We are in servlet environment, so principal information resides in HttpServletRequest
-                ((org.apache.struts2.action.PrincipalAware) action).withPrincipalProxy(new ServletPrincipalProxy(request));
-            }
-        }
-
         if (action instanceof ServletContextAware) {
             ServletContext servletContext = (ServletContext) context.get(SERVLET_CONTEXT);
             ((ServletContextAware) action).setServletContext(servletContext);
         }
-
-        if (action instanceof org.apache.struts2.action.ServletContextAware) {
-            ServletContext servletContext = (ServletContext) context.get(SERVLET_CONTEXT);
-            ((org.apache.struts2.action.ServletContextAware) action).withServletContext(servletContext);
-        }
-
         return invocation.invoke();
     }
 }

@@ -47,11 +47,6 @@
             <artifactId>struts2-config-browser-plugin</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-xml</artifactId>
-        </dependency>
-
         <!-- Logging -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -73,31 +68,25 @@
         <dependency>
             <groupId>net.sourceforge.jwebunit</groupId>
             <artifactId>jwebunit-core</artifactId>
-            <version>3.3</version>
+            <version>1.4.1</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
-            <groupId>net.sourceforge.htmlunit</groupId>
-            <artifactId>htmlunit</artifactId>
-            <version>2.27</version>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>3.1</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>net.sourceforge.jwebunit</groupId>
             <artifactId>jwebunit-htmlunit-plugin</artifactId>
-            <version>3.3</version>
+            <version>1.4.1</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
                     <groupId>xom</groupId>
                     <artifactId>xom</artifactId>
-                </exclusion>
-                <!-- not necessary to compile and it force dependency convergence issues -->
-                <exclusion>
-                    <groupId>net.sourceforge.htmlunit</groupId>
-                    <artifactId>htmlunit</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

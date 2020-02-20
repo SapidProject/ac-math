@@ -555,7 +555,7 @@ public class ParametersInterceptorTest extends XWorkTestCase {
         XmlConfigurationProvider provider = new XmlConfigurationProvider("xwork-test-beans.xml");
         container.inject(provider);
         loadConfigurationProviders(provider,
-                new MockConfigurationProvider(Collections.singletonMap("struts.devMode", "true")));
+                new MockConfigurationProvider(Collections.singletonMap("devMode", "true")));
         Map<String, Object> params = new HashMap<>();
         params.put("not_a_property", "There is no action property named like this");
 
@@ -574,7 +574,7 @@ public class ParametersInterceptorTest extends XWorkTestCase {
         XmlConfigurationProvider provider = new XmlConfigurationProvider("xwork-test-beans.xml");
         container.inject(provider);
         loadConfigurationProviders(provider,
-                new MockConfigurationProvider(Collections.singletonMap("struts.devMode", "false")));
+                new MockConfigurationProvider(Collections.singletonMap("devMode", "false")));
         Map<String, Object> params = new HashMap<>();
         params.put("not_a_property", "There is no action property named like this");
 
@@ -764,7 +764,7 @@ public class ParametersInterceptorTest extends XWorkTestCase {
         ValueStack stack = new OgnlValueStack(
                 container.getInstance(XWorkConverter.class),
                 (CompoundRootAccessor) container.getInstance(PropertyAccessor.class, CompoundRoot.class.getName()),
-                container.getInstance(TextProvider.class, "system"), true, true) {
+                container.getInstance(TextProvider.class, "system"), true) {
             @Override
             public void setValue(String expr, Object value) {
                 actual.put(expr, value);

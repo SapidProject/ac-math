@@ -1,21 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
 package org.apache.struts2.factory;
 
 import com.opensymphony.xwork2.ActionProxy;
@@ -41,7 +23,7 @@ public class PrefixBasedActionProxyFactoryTest extends StrutsInternalTestCase {
     private PrefixBasedActionProxyFactory factory;
 
     public void testDifferentPrefixes() throws Exception {
-        initFactory("/ns1:prefix1,/ns2:prefix2");
+        factory.setPrefixBasedActionProxyFactories("/ns1:prefix1,/ns2:prefix2");
 
         ActionProxy proxy1 = factory.createActionProxy("/ns1", "", "", Collections.<String, Object>emptyMap(), false, true);
         assertTrue(proxy1 instanceof Prefix1ActionProxy);
@@ -51,7 +33,7 @@ public class PrefixBasedActionProxyFactoryTest extends StrutsInternalTestCase {
     }
 
     public void testFallbackToDefault() throws Exception {
-        initFactory("/ns1:prefix1");
+        factory.setPrefixBasedActionProxyFactories("/ns1:prefix1");
 
         ActionProxy proxy1 = factory.createActionProxy("/ns1", "", "", Collections.<String, Object>emptyMap(), false, true);
         assertTrue(proxy1 instanceof Prefix1ActionProxy);
@@ -61,7 +43,7 @@ public class PrefixBasedActionProxyFactoryTest extends StrutsInternalTestCase {
     }
 
     public void testEmptyPrefix() throws Exception {
-        initFactory(":prefix1");
+        factory.setPrefixBasedActionProxyFactories(":prefix1");
 
         ActionProxy proxy1 = factory.createActionProxy("/ns1", "", "", Collections.<String, Object>emptyMap(), false, true);
         assertTrue(proxy1 instanceof Prefix1ActionProxy);
@@ -81,9 +63,7 @@ public class PrefixBasedActionProxyFactoryTest extends StrutsInternalTestCase {
                             public Object create(Context context) throws Exception {
                                 return new Prefix1Factory();
                             }
-                            public Class type() {
-                                return Prefix1Factory.class;
-                            }
+
                         }, Scope.SINGLETON);
                     }
                 },
@@ -94,9 +74,7 @@ public class PrefixBasedActionProxyFactoryTest extends StrutsInternalTestCase {
                             public Object create(Context context) throws Exception {
                                 return new Prefix2Factory();
                             }
-                            public Class type() {
-                                return Prefix2Factory.class;
-                            }
+
                         }, Scope.SINGLETON);
                     }
                 }
@@ -106,11 +84,6 @@ public class PrefixBasedActionProxyFactoryTest extends StrutsInternalTestCase {
 
         factory = new PrefixBasedActionProxyFactory();
         factory.setContainer(container);
-    }
-
-    void initFactory(String list) {
-        factory.setPrefixBasedActionProxyFactories(list);
-        factory.init();
     }
 
     @Override

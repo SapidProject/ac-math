@@ -151,7 +151,7 @@ public class ObjectFactory implements Serializable {
      * @throws Exception in case of any error
      */
     public Object buildBean(Class clazz, Map<String, Object> extraContext) throws Exception {
-        return container.inject(clazz);
+        return clazz.newInstance();
     }
 
     /**
@@ -160,7 +160,6 @@ public class ObjectFactory implements Serializable {
      */
     protected Object injectInternalBeans(Object obj) {
         if (obj != null && container != null) {
-            LOG.debug("Injecting internal beans into [{}]", obj.getClass().getSimpleName());
             container.inject(obj);
         }
         return obj;
@@ -189,7 +188,11 @@ public class ObjectFactory implements Serializable {
      */
     public Object buildBean(String className, Map<String, Object> extraContext, boolean injectInternal) throws Exception {
         Class clazz = getClassInstance(className);
-        return buildBean(clazz, extraContext);
+        Object obj = buildBean(clazz, extraContext);
+        if (injectInternal) {
+            injectInternalBeans(obj);
+        }
+        return obj;
     }
 
     /**

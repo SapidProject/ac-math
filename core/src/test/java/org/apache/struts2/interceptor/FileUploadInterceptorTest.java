@@ -40,7 +40,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -225,8 +224,10 @@ public class FileUploadInterceptorTest extends StrutsInternalTestCase {
     public void testInvalidContentTypeMultipartRequest() throws Exception {
         MockHttpServletRequest req = new MockHttpServletRequest();
 
-        req.setContentType("multipart/form-data"); // not a multipart contentype
+        req.setCharacterEncoding("text/html");
+        req.setContentType("text/xml"); // not a multipart contentype
         req.setMethod("post");
+        req.addHeader("Content-type", "multipart/form-data");
 
         MyFileupAction action = container.inject(MyFileupAction.class);
         MockActionInvocation mai = new MockActionInvocation();
@@ -245,7 +246,7 @@ public class FileUploadInterceptorTest extends StrutsInternalTestCase {
     public void testNoContentMultipartRequest() throws Exception {
         MockHttpServletRequest req = new MockHttpServletRequest();
 
-        req.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        req.setCharacterEncoding("text/html");
         req.setMethod("post");
         req.addHeader("Content-type", "multipart/form-data");
         req.setContent(null); // there is no content
@@ -266,7 +267,7 @@ public class FileUploadInterceptorTest extends StrutsInternalTestCase {
 
     public void testSuccessUploadOfATextFileMultipartRequest() throws Exception {
         MockHttpServletRequest req = new MockHttpServletRequest();
-        req.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        req.setCharacterEncoding("text/html");
         req.setMethod("post");
         req.addHeader("Content-type", "multipart/form-data; boundary=---1234");
 
@@ -323,7 +324,7 @@ public class FileUploadInterceptorTest extends StrutsInternalTestCase {
         final String endline = "\r\n";
 
         MockHttpServletRequest req = new MockHttpServletRequest();
-        req.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        req.setCharacterEncoding("text/html");
         req.setMethod("POST");
         req.addHeader("Content-type", "multipart/form-data; boundary=" + bondary);
         StringBuilder content = new StringBuilder(128);
@@ -372,7 +373,7 @@ public class FileUploadInterceptorTest extends StrutsInternalTestCase {
 
     public void testMultipartRequestLocalizedError() throws Exception {
         MockHttpServletRequest req = new MockHttpServletRequest();
-        req.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        req.setCharacterEncoding("text/html");
         req.setMethod("post");
         req.addHeader("Content-type", "multipart/form-data; boundary=---1234");
 

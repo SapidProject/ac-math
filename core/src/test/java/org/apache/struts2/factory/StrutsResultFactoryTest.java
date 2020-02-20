@@ -18,7 +18,6 @@
  */
 package org.apache.struts2.factory;
 
-import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.Result;
 import com.opensymphony.xwork2.config.entities.ResultConfig;
@@ -40,9 +39,10 @@ public class StrutsResultFactoryTest extends StrutsInternalTestCase {
         params.put("accept", "ok");
         params.put("reject", "bad");
         ResultConfig config = new ResultConfig.Builder("struts", MyResult.class.getName()).addParams(params).build();
+        Map<String, Object> context = new HashMap<String, Object>();
 
         // when
-        Result result = builder.buildResult(config, ActionContext.getContext().getContextMap());
+        Result result = builder.buildResult(config, context);
 
         // then
         assertEquals("ok", ((MyResult)result).getAccept());

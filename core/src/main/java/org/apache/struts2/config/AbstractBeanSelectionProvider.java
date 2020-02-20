@@ -89,6 +89,12 @@ public abstract class AbstractBeanSelectionProvider implements BeanSelectionProv
         }
     }
 
+    protected void convertIfExist(LocatableProperties props, String fromKey, String toKey) {
+        if (props.containsKey(fromKey)) {
+            props.setProperty(toKey, props.getProperty(fromKey));
+        }
+    }
+
     static class ObjectFactoryDelegateFactory implements Factory {
 
         String name;
@@ -106,11 +112,6 @@ public abstract class AbstractBeanSelectionProvider implements BeanSelectionProv
             } catch (ClassNotFoundException ex) {
                 throw new ConfigurationException("Unable to load bean "+type.getName()+" ("+name+")");
             }
-        }
-
-        @Override
-        public Class type() {
-            return type;
         }
     }
 }

@@ -1,18 +1,23 @@
-/*
+/**
  * Copyright (C) 2006 Google Inc.
  *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
+ * </p>
  *
  *  http://www.apache.org/licenses/LICENSE-2.0
  *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * </p>
  */
+
 package com.opensymphony.xwork2.inject;
 
 import com.opensymphony.xwork2.inject.util.ReferenceCache;
@@ -155,11 +160,6 @@ class ContainerImpl implements Container {
         return Modifier.isStatic(member.getModifiers());
     }
 
-    private static boolean isNotPublic(Member member) {
-        return !Modifier.isPublic(member.getModifiers()) ||
-                !Modifier.isPublic(member.getDeclaringClass().getModifiers());
-    }
-
     static class FieldInjector implements Injector {
 
         final Field field;
@@ -169,7 +169,7 @@ class ContainerImpl implements Container {
         public FieldInjector(ContainerImpl container, Field field, String name)
                 throws MissingDependencyException {
             this.field = field;
-            if (isNotPublic(field) && !field.isAccessible()) {
+            if (!field.isAccessible()) {
                 SecurityManager sm = System.getSecurityManager();
                 try {
                     if (sm != null) {
@@ -261,7 +261,7 @@ class ContainerImpl implements Container {
 
         public MethodInjector(ContainerImpl container, Method method, String name) throws MissingDependencyException {
             this.method = method;
-            if (isNotPublic(method) && !method.isAccessible()) {
+            if (!method.isAccessible()) {
                 SecurityManager sm = System.getSecurityManager();
                 try {
                     if (sm != null) {
@@ -311,7 +311,7 @@ class ContainerImpl implements Container {
             this.implementation = implementation;
 
             constructor = findConstructorIn(implementation);
-            if (isNotPublic(constructor) && !constructor.isAccessible()) {
+            if (!constructor.isAccessible()) {
                 SecurityManager sm = System.getSecurityManager();
                 try {
                     if (sm != null) {

@@ -24,7 +24,6 @@ import com.opensymphony.xwork2.test.ModelDrivenAnnotationAction2;
 import com.opensymphony.xwork2.util.Bar;
 import com.opensymphony.xwork2.util.ValueStack;
 import com.opensymphony.xwork2.util.reflection.ReflectionContextState;
-import ognl.Ognl;
 import ognl.OgnlException;
 import ognl.OgnlRuntime;
 
@@ -113,10 +112,10 @@ public class AnnotationXWorkConverterTest extends XWorkTestCase {
         assertEquals("Conversion should have failed.", OgnlRuntime.NoConversionPossible, converter.convertValue(ognlStackContext, action.getBean(), null, "birth", value, Date.class));
         stack.pop();
 
-        Map<String, ConversionData> conversionErrors = (Map<String, ConversionData>) stack.getContext().get(ActionContext.CONVERSION_ERRORS);
+        Map conversionErrors = (Map) stack.getContext().get(ActionContext.CONVERSION_ERRORS);
         assertNotNull(conversionErrors);
         assertTrue(conversionErrors.size() == 1);
-        assertEquals(value, conversionErrors.get("bean.birth").getValue());
+        assertEquals(value, conversionErrors.get("bean.birth"));
     }
 
     public void testFieldErrorMessageAddedWhenConversionFails() {
@@ -133,11 +132,11 @@ public class AnnotationXWorkConverterTest extends XWorkTestCase {
         assertEquals("Conversion should have failed.", OgnlRuntime.NoConversionPossible, converter.convertValue(ognlStackContext, action, null, "date", value, Date.class));
         stack.pop();
 
-        Map<String, ConversionData> conversionErrors = (Map<String, ConversionData>) ognlStackContext.get(ActionContext.CONVERSION_ERRORS);
+        Map conversionErrors = (Map) ognlStackContext.get(ActionContext.CONVERSION_ERRORS);
         assertNotNull(conversionErrors);
         assertEquals(1, conversionErrors.size());
         assertNotNull(conversionErrors.get("date"));
-        assertEquals(value, conversionErrors.get("date").getValue());
+        assertEquals(value, conversionErrors.get("date"));
     }
 
     public void testFieldErrorMessageAddedWhenConversionFailsOnModelDriven() {
@@ -154,11 +153,11 @@ public class AnnotationXWorkConverterTest extends XWorkTestCase {
         stack.pop();
         stack.pop();
 
-        Map<String, ConversionData> conversionErrors = (Map<String, ConversionData>) ognlStackContext.get(ActionContext.CONVERSION_ERRORS);
+        Map conversionErrors = (Map) ognlStackContext.get(ActionContext.CONVERSION_ERRORS);
         assertNotNull(conversionErrors);
         assertEquals(1, conversionErrors.size());
         assertNotNull(conversionErrors.get("birth"));
-        assertEquals(value, conversionErrors.get("birth").getValue());
+        assertEquals(value, conversionErrors.get("birth"));
     }
 
     public void testFindConversionErrorMessage() {
@@ -169,16 +168,16 @@ public class AnnotationXWorkConverterTest extends XWorkTestCase {
         stack.push(action);
         stack.push(action.getModel());
 
-        String message = XWorkConverter.getConversionErrorMessage("birth", Integer.class, stack);
+        String message = XWorkConverter.getConversionErrorMessage("birth", stack);
         assertNotNull(message);
         assertEquals("Invalid date for birth.", message);
 
-        message = XWorkConverter.getConversionErrorMessage("foo", Integer.class, stack);
+        message = XWorkConverter.getConversionErrorMessage("foo", stack);
         assertNotNull(message);
         assertEquals("Invalid field value for field \"foo\".", message);
     }
 
-    public void testFindConversionMappingForInterfaceAndSuperclass() {
+    public void testFindConversionMappingForInterface() {
         ModelDrivenAnnotationAction2 action = new ModelDrivenAnnotationAction2();
         ValueStack stack = ActionContext.getContext().getValueStack();
         stack.push(action);
@@ -194,14 +193,6 @@ public class AnnotationXWorkConverterTest extends XWorkTestCase {
 
         Bar b = (Bar) o;
         assertEquals(value, b.getTitle() + ":" + b.getSomethingElse());
-
-        String value2 = "qwer:456";
-        Object o2 = converter.convertValue(ognlStackContext, action.getModel(), null, "supperBarObj", value2, Bar.class);
-        assertNotNull(o2);
-        assertTrue("class is: " + o.getClass(), o2 instanceof Bar);
-
-        Bar b2 = (Bar) o2;
-        assertEquals(value2, b2.getTitle() + ":" + b2.getSomethingElse());
     }
 
     public void testLocalizedDateConversion() throws Exception {

@@ -42,9 +42,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.struts2.StrutsConstants;
-import org.apache.struts2.conversion.StrutsConversionPropertiesProcessor;
-import org.apache.struts2.conversion.StrutsTypeConverterHolder;
-import org.apache.struts2.conversion.StrutsTypeConverterCreator;
 
 import java.util.*;
 
@@ -175,11 +172,6 @@ public class DefaultConfiguration implements Configuration {
             public Configuration create(Context context) throws Exception {
                 return DefaultConfiguration.this;
             }
-
-            @Override
-            public Class<? extends Configuration> type() {
-                return DefaultConfiguration.this.getClass();
-            }
         });
 
         ActionContext oldContext = ActionContext.getContext();
@@ -246,7 +238,7 @@ public class DefaultConfiguration implements Configuration {
         builder.factory(ResultFactory.class, DefaultResultFactory.class, Scope.SINGLETON);
         builder.factory(InterceptorFactory.class, DefaultInterceptorFactory.class, Scope.SINGLETON);
         builder.factory(com.opensymphony.xwork2.factory.ValidatorFactory.class, com.opensymphony.xwork2.factory.DefaultValidatorFactory.class, Scope.SINGLETON);
-        builder.factory(ConverterFactory.class, StrutsConverterFactory.class, Scope.SINGLETON);
+        builder.factory(ConverterFactory.class, DefaultConverterFactory.class, Scope.SINGLETON);
         builder.factory(UnknownHandlerFactory.class, DefaultUnknownHandlerFactory.class, Scope.SINGLETON);
 
         builder.factory(FileManager.class, "system", DefaultFileManager.class, Scope.SINGLETON);
@@ -257,18 +249,18 @@ public class DefaultConfiguration implements Configuration {
         builder.factory(ValueStackFactory.class, OgnlValueStackFactory.class, Scope.SINGLETON);
 
         builder.factory(XWorkConverter.class, Scope.SINGLETON);
-        builder.factory(ConversionPropertiesProcessor.class, StrutsConversionPropertiesProcessor.class, Scope.SINGLETON);
+        builder.factory(ConversionPropertiesProcessor.class, DefaultConversionPropertiesProcessor.class, Scope.SINGLETON);
         builder.factory(ConversionFileProcessor.class, DefaultConversionFileProcessor.class, Scope.SINGLETON);
         builder.factory(ConversionAnnotationProcessor.class, DefaultConversionAnnotationProcessor.class, Scope.SINGLETON);
-        builder.factory(TypeConverterCreator.class, StrutsTypeConverterCreator.class, Scope.SINGLETON);
-        builder.factory(TypeConverterHolder.class, StrutsTypeConverterHolder.class, Scope.SINGLETON);
+        builder.factory(TypeConverterCreator.class, DefaultTypeConverterCreator.class, Scope.SINGLETON);
+        builder.factory(TypeConverterHolder.class, DefaultTypeConverterHolder.class, Scope.SINGLETON);
 
         builder.factory(XWorkBasicConverter.class, Scope.SINGLETON);
-        builder.factory(TypeConverter.class, StrutsConstants.STRUTS_CONVERTER_COLLECTION,  CollectionConverter.class, Scope.SINGLETON);
-        builder.factory(TypeConverter.class, StrutsConstants.STRUTS_CONVERTER_ARRAY, ArrayConverter.class, Scope.SINGLETON);
-        builder.factory(TypeConverter.class, StrutsConstants.STRUTS_CONVERTER_DATE, DateConverter.class, Scope.SINGLETON);
-        builder.factory(TypeConverter.class, StrutsConstants.STRUTS_CONVERTER_NUMBER,  NumberConverter.class, Scope.SINGLETON);
-        builder.factory(TypeConverter.class, StrutsConstants.STRUTS_CONVERTER_STRING, StringConverter.class, Scope.SINGLETON);
+        builder.factory(TypeConverter.class, XWorkConstants.COLLECTION_CONVERTER,  CollectionConverter.class, Scope.SINGLETON);
+        builder.factory(TypeConverter.class, XWorkConstants.ARRAY_CONVERTER, ArrayConverter.class, Scope.SINGLETON);
+        builder.factory(TypeConverter.class, XWorkConstants.DATE_CONVERTER, DateConverter.class, Scope.SINGLETON);
+        builder.factory(TypeConverter.class, XWorkConstants.NUMBER_CONVERTER,  NumberConverter.class, Scope.SINGLETON);
+        builder.factory(TypeConverter.class, XWorkConstants.STRING_CONVERTER, StringConverter.class, Scope.SINGLETON);
 
         builder.factory(TextProvider.class, "system", DefaultTextProvider.class, Scope.SINGLETON);
 
@@ -284,11 +276,12 @@ public class DefaultConfiguration implements Configuration {
 
         builder.factory(ValueSubstitutor.class, EnvsValueSubstitutor.class, Scope.SINGLETON);
 
+        builder.constant(XWorkConstants.DEV_MODE, "false");
         builder.constant(StrutsConstants.STRUTS_DEVMODE, "false");
-        builder.constant(StrutsConstants.STRUTS_LOG_MISSING_PROPERTIES, "false");
-        builder.constant(StrutsConstants.STRUTS_ENABLE_OGNL_EVAL_EXPRESSION, "false");
-        builder.constant(StrutsConstants.STRUTS_ENABLE_OGNL_EXPRESSION_CACHE, "true");
-        builder.constant(StrutsConstants.STRUTS_CONFIGURATION_XML_RELOAD, "false");
+        builder.constant(XWorkConstants.LOG_MISSING_PROPERTIES, "false");
+        builder.constant(XWorkConstants.ENABLE_OGNL_EVAL_EXPRESSION, "false");
+        builder.constant(XWorkConstants.ENABLE_OGNL_EXPRESSION_CACHE, "true");
+        builder.constant(XWorkConstants.RELOAD_XML_CONFIGURATION, "false");
         builder.constant(StrutsConstants.STRUTS_I18N_RELOAD, "false");
 
         return builder.create(true);

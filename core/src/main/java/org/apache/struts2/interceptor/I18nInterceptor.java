@@ -261,7 +261,6 @@ public class I18nInterceptor extends AbstractInterceptor {
             super(invocation);
         }
 
-        @Override
         public Locale find() {
             Locale requestOnlyLocale = super.find();
 
@@ -282,6 +281,7 @@ public class I18nInterceptor extends AbstractInterceptor {
 
         @Override
         public Locale store(ActionInvocation invocation, Locale locale) {
+            //save it in session
             Map<String, Object> session = invocation.getInvocationContext().getSession();
 
             if (session != null) {
@@ -290,7 +290,6 @@ public class I18nInterceptor extends AbstractInterceptor {
                     session.put(attributeName, locale);
                 }
             }
-
             return locale;
         }
 
@@ -299,15 +298,19 @@ public class I18nInterceptor extends AbstractInterceptor {
             Locale locale = null;
 
             LOG.debug("Checks session for saved locale");
-            HttpSession session = ServletActionContext.getRequest().getSession(false);
+            Map<String, Object> session = invocation.getInvocationContext().getSession();
 
             if (session != null) {
-                String sessionId = session.getId();
-                synchronized (sessionId.intern()) {
-                    Object sessionLocale = invocation.getInvocationContext().getSession().get(attributeName);
-                    if (sessionLocale != null && sessionLocale instanceof Locale) {
-                        locale = (Locale) sessionLocale;
-                        LOG.debug("Applied session locale: {}", locale);
+                //[WW-4741] Do not force session creation while this is a read operation
+                HttpSession httpSession = ServletActionContext.getRequest().getSession(false);
+                if(null != httpSession) {
+                    String sessionId = httpSession.getId();
+                    synchronized (sessionId.intern()) {
+                        Object sessionLocale = session.get(attributeName);
+                        if (sessionLocale != null && sessionLocale instanceof Locale) {
+                            locale = (Locale) sessionLocale;
+                            LOG.debug("Applied session locale: {}", locale);
+                        }
                     }
                 }
             }

@@ -75,10 +75,10 @@ public class DefaultObjectTypeDeterminer implements ObjectTypeDeterminer {
 
     /**
      * Determines the key class by looking for the value of @Key annotation for the given class.
-     * If no annotation is found, it determines the key class by looking for the value of Key_${property} in the properties
-     * file for the given class.
+     * If no annotation is found, the key class is determined by using the generic parametrics.
      *
-     * As fallback, the key class is determined by using the generic parametrics.
+     * As fallback, it determines the key class by looking for the value of Key_${property} in the properties
+     * file for the given class.
      *
      * @param parentClass the Class which contains as a property the Map or Collection we are finding the key for.
      * @param property    the property of the Map or Collection for the given parent class
@@ -89,20 +89,20 @@ public class DefaultObjectTypeDeterminer implements ObjectTypeDeterminer {
         if (annotation != null) {
             return annotation.value();
         }
-        Class clazz = (Class) xworkConverter.getConverter(parentClass, KEY_PREFIX + property);
+        Class clazz = getClass(parentClass, property, false);
         if (clazz != null) {
             return clazz;
         }
-        return getClass(parentClass, property, false);
+        return (Class) xworkConverter.getConverter(parentClass, KEY_PREFIX + property);
     }
 
     /**
      * Determines the element class by looking for the value of @Element annotation for the given
      * class.
-     * If no annotation is found, it determines the key class by looking for the value of Element_${property} in the properties
-     * file for the given class. Also looks for the deprecated Collection_${property}
+     * If no annotation is found, the element class is determined by using the generic parametrics.
      *
-     * As fallback, the element class is determined by using the generic parametrics.
+     * As fallback, it determines the key class by looking for the value of Element_${property} in the properties
+     * file for the given class. Also looks for the deprecated Collection_${property}
      *
      * @param parentClass the Class which contains as a property the Map or Collection we are finding the key for.
      * @param property    the property of the Map or Collection for the given parent class
@@ -113,17 +113,17 @@ public class DefaultObjectTypeDeterminer implements ObjectTypeDeterminer {
         if (annotation != null) {
             return annotation.value();
         }
-        Class clazz = (Class) xworkConverter.getConverter(parentClass, ELEMENT_PREFIX + property);
+        Class clazz = getClass(parentClass, property, true);
+        if (clazz != null) {
+            return clazz;
+        }
+        clazz = (Class) xworkConverter.getConverter(parentClass, ELEMENT_PREFIX + property);
         if (clazz == null) {
             clazz = (Class) xworkConverter.getConverter(parentClass, DEPRECATED_ELEMENT_PREFIX + property);
             if (clazz != null) {
                 LOG.info("The Collection_xxx pattern for collection type conversion is deprecated. Please use Element_xxx!");
             }
         }
-        if (clazz != null) {
-            return clazz;
-        }
-        clazz = getClass(parentClass, property, true);
         return clazz;
     }
 

@@ -27,7 +27,7 @@
 </#if>
 >
     <td class="tdCheckboxErrorMessage" colspan="2"><#rt/>
-        <span class="errorMessage">${error}</span><#t/>
+        <span class="errorMessage">${error?html}</span><#t/>
     </td><#lt/>
 </tr>
 </#list>
@@ -42,7 +42,7 @@
     <td colspan="2">
 <#if parameters.label??> <label<#t/>
 <#if parameters.id??>
- for="${parameters.id}"<#rt/>
+ for="${parameters.id?html}"<#rt/>
 </#if>
 <#if hasFieldErrors>
  class="checkboxErrorLabel"<#rt/>
@@ -53,7 +53,7 @@
 <#if parameters.required!false && parameters.requiredPosition!"right" != 'right'>
         <span class="required">*</span><#t/>
 </#if>
-${parameters.label}<#t/>
+${parameters.label?html}<#t/>
 <#if parameters.required!false && parameters.requiredPosition!"right" == 'right'>
  <span class="required">*</span><#t/>
 </#if>
@@ -74,7 +74,7 @@ ${parameters.label}<#t/>
 <#if (labelpos!"") == 'left'>
 <#if parameters.label??> <label<#t/>
 <#if parameters.id??>
- for="${parameters.id}"<#rt/>
+ for="${parameters.id?html}"<#rt/>
 </#if>
 <#if hasFieldErrors>
  class="checkboxErrorLabel"<#rt/>
@@ -85,7 +85,7 @@ ${parameters.label}<#t/>
 <#if parameters.required!false && parameters.requiredPosition!"right" != 'right'>
         <span class="required">*</span><#t/>
 </#if>
-${parameters.label}<#t/>
+${parameters.label?html}<#t/>
 <#if parameters.required!false && parameters.requiredPosition!"right" == 'right'>
  <span class="required">*</span><#t/>
 </#if>
@@ -113,14 +113,14 @@ ${parameters.label}<#t/>
 <#if (labelpos!"") != 'top' && (labelpos!"") != 'left'>
 <#if parameters.label??> <label<#t/>
 <#if parameters.id??>
- for="${parameters.id}"<#rt/>
+ for="${parameters.id?html}"<#rt/>
 </#if>
 <#if hasFieldErrors>
  class="checkboxErrorLabel"<#rt/>
 <#else>
  class="checkboxLabel"<#rt/>
 </#if>
->${parameters.label}</label><#rt/>
+>${parameters.label?html}</label><#rt/>
 </#if>
 </#if>
 </#if>

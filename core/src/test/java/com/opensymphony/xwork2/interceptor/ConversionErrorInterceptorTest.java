@@ -21,7 +21,6 @@ package com.opensymphony.xwork2.interceptor;
 import com.mockobjects.dynamic.C;
 import com.mockobjects.dynamic.Mock;
 import com.opensymphony.xwork2.*;
-import com.opensymphony.xwork2.conversion.impl.ConversionData;
 import com.opensymphony.xwork2.mock.MockActionInvocation;
 import com.opensymphony.xwork2.util.ValueStack;
 
@@ -39,13 +38,13 @@ public class ConversionErrorInterceptorTest extends XWorkTestCase {
     protected ActionContext context;
     protected ActionInvocation invocation;
     protected ConversionErrorInterceptor interceptor;
-    protected Map<String, ConversionData> conversionErrors;
+    protected Map<String, Object> conversionErrors;
     protected Mock mockInvocation;
     protected ValueStack stack;
 
 
     public void testFieldErrorAdded() throws Exception {
-        conversionErrors.put("foo", new ConversionData(123L, int.class));
+        conversionErrors.put("foo", 123L);
 
         SimpleAction action = new SimpleAction();
         mockInvocation.expectAndReturn("getAction", action);
@@ -59,7 +58,7 @@ public class ConversionErrorInterceptorTest extends XWorkTestCase {
 
     public void testFieldErrorWithMapKeyAdded() throws Exception {
         String fieldName = "foo['1'].intValue";
-        conversionErrors.put(fieldName, new ConversionData("bar", int.class));
+        conversionErrors.put(fieldName, "bar");
         ActionSupport action = new ActionSupport();
         mockInvocation.expectAndReturn("getAction", action);
         stack.push(action);
@@ -71,7 +70,7 @@ public class ConversionErrorInterceptorTest extends XWorkTestCase {
     }
 
     public void testWithPreResultListener() throws Exception {
-        conversionErrors.put("foo", new ConversionData("Hello", int.class));
+        conversionErrors.put("foo", "Hello");
 
         ActionContext ac = createActionContext();
         MockActionInvocation mai = createActionInvocation(ac);
@@ -94,7 +93,7 @@ public class ConversionErrorInterceptorTest extends XWorkTestCase {
      * @throws Exception
      */
     public void testWithPreResultListenerAgainstMaliciousCode() throws Exception {
-        conversionErrors.put("foo", new ConversionData("\" + #root + \"", int.class));
+        conversionErrors.put("foo", "\" + #root + \"");
 
         ActionContext ac = createActionContext();
 

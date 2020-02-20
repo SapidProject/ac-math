@@ -18,38 +18,31 @@
  */
 package org.apache.struts2.views.jsp.ui;
 
-import com.opensymphony.xwork2.ActionContext;
+import ognl.Ognl;
 import ognl.OgnlException;
 
 import com.opensymphony.xwork2.inject.Inject;
 import com.opensymphony.xwork2.ognl.OgnlUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * FIXME: remove?
  */
 public class OgnlTool {
 
-    private static final Logger LOG = LogManager.getLogger(OgnlTool.class);
-
     private OgnlUtil ognlUtil;
-
+    
     public OgnlTool() {
     }
-
+    
     @Inject
     public void setOgnlUtil(OgnlUtil ognlUtil) {
         this.ognlUtil = ognlUtil;
     }
-
+    
     public Object findValue(String expr, Object context) {
         try {
-            return ognlUtil.getValue(expr, ActionContext.getContext().getContextMap(), context);
+            return Ognl.getValue(ognlUtil.compile(expr), context);
         } catch (OgnlException e) {
-            if (e.getReason() instanceof SecurityException) {
-                LOG.error("Could not evaluate this expression due to security constraints: [{}]", expr, e);
-            }
             return null;
         }
     }

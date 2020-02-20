@@ -135,10 +135,10 @@ public class XWorkConverterTest extends XWorkTestCase {
         assertEquals("Conversion should have failed.", OgnlRuntime.NoConversionPossible, converter.convertValue(ognlStackContext, action.getBean(), null, "birth", value, Date.class));
         stack.pop();
 
-        Map<String, ConversionData> conversionErrors = (Map<String, ConversionData>) stack.getContext().get(ActionContext.CONVERSION_ERRORS);
+        Map conversionErrors = (Map) stack.getContext().get(ActionContext.CONVERSION_ERRORS);
         assertNotNull(conversionErrors);
         assertTrue(conversionErrors.size() == 1);
-        assertEquals(value, conversionErrors.get("bean.birth").getValue());
+        assertEquals(value, conversionErrors.get("bean.birth"));
     }
 
     public void testFieldErrorMessageAddedWhenConversionFails() {
@@ -154,11 +154,11 @@ public class XWorkConverterTest extends XWorkTestCase {
         assertEquals("Conversion should have failed.", OgnlRuntime.NoConversionPossible, converter.convertValue(ognlStackContext, action, null, "date", value, Date.class));
         stack.pop();
 
-        Map<String, ConversionData> conversionErrors = (Map<String, ConversionData>) ognlStackContext.get(ActionContext.CONVERSION_ERRORS);
+        Map conversionErrors = (Map) ognlStackContext.get(ActionContext.CONVERSION_ERRORS);
         assertNotNull(conversionErrors);
         assertEquals(1, conversionErrors.size());
         assertNotNull(conversionErrors.get("date"));
-        assertEquals(value, conversionErrors.get("date").getValue());
+        assertEquals(value, conversionErrors.get("date"));
     }
 
     public void testFieldErrorMessageAddedWhenConversionFailsOnModelDriven() {
@@ -174,11 +174,11 @@ public class XWorkConverterTest extends XWorkTestCase {
         stack.pop();
         stack.pop();
 
-        Map<String, ConversionData> conversionErrors = (Map<String, ConversionData>) ognlStackContext.get(ActionContext.CONVERSION_ERRORS);
+        Map conversionErrors = (Map) ognlStackContext.get(ActionContext.CONVERSION_ERRORS);
         assertNotNull(conversionErrors);
         assertEquals(1, conversionErrors.size());
         assertNotNull(conversionErrors.get("birth"));
-        assertEquals(value, conversionErrors.get("birth").getValue());
+        assertEquals(value, conversionErrors.get("birth"));
     }
 
     public void testDateStrictConversion() throws Exception {
@@ -208,11 +208,11 @@ public class XWorkConverterTest extends XWorkTestCase {
         stack.push(action);
         stack.push(action.getModel());
 
-        String message = XWorkConverter.getConversionErrorMessage("birth", Integer.class, stack);
+        String message = XWorkConverter.getConversionErrorMessage("birth", stack);
         assertNotNull(message);
         assertEquals("Invalid date for birth.", message);
 
-        message = XWorkConverter.getConversionErrorMessage("foo", Integer.class, stack);
+        message = XWorkConverter.getConversionErrorMessage("foo", stack);
         assertNotNull(message);
         assertEquals("Invalid field value for field \"foo\".", message);
     }
@@ -232,83 +232,6 @@ public class XWorkConverterTest extends XWorkTestCase {
 
         Bar b = (Bar) o;
         assertEquals(value, b.getTitle() + ":" + b.getSomethingElse());
-    }
-
-    public void testDefaultFieldConversionErrorMessage() {
-        SimpleAction action = new SimpleAction();
-        container.inject(action);
-
-        stack.push(action);
-
-        String message = XWorkConverter.getConversionErrorMessage("baz", int.class, stack);
-        assertNotNull(message);
-        assertEquals("Invalid field value for field \"baz\".", message);
-    }
-
-    public void testCustomFieldConversionErrorMessage() {
-        SimpleAction action = new SimpleAction();
-        container.inject(action);
-
-        stack.push(action);
-
-        String message = XWorkConverter.getConversionErrorMessage("foo", int.class, stack);
-        assertNotNull(message);
-        assertEquals("Custom error message for foo.", message);
-    }
-
-    public void testCustomPrimitiveConversionErrorMessage() {
-        SimpleAction action = new SimpleAction();
-        container.inject(action);
-
-        stack.push(action);
-
-        String message = XWorkConverter.getConversionErrorMessage("percentage", double.class, stack);
-        assertNotNull(message);
-        assertEquals("Custom error message for double.", message);
-    }
-
-    public void testCustomClassConversionErrorMessage() {
-        SimpleAction action = new SimpleAction();
-        container.inject(action);
-
-        stack.push(action);
-
-        String message = XWorkConverter.getConversionErrorMessage("date", Date.class, stack);
-        assertNotNull(message);
-        assertEquals("Custom error message for java.util.Date.", message);
-    }
-
-    public void testDefaultIndexedConversionErrorMessage() {
-        SimpleAction action = new SimpleAction();
-        container.inject(action);
-
-        stack.push(action);
-
-        String message = XWorkConverter.getConversionErrorMessage("beanList[0].name", String.class, stack);
-        assertNotNull(message);
-        assertEquals("Invalid field value for field \"beanList[0].name\".", message);
-    }
-
-    public void testCustomIndexedFieldConversionErrorMessage() {
-        SimpleAction action = new SimpleAction();
-        container.inject(action);
-
-        stack.push(action);
-
-        String message = XWorkConverter.getConversionErrorMessage("beanList[0].count", int.class, stack);
-        assertNotNull(message);
-        assertEquals("Custom error message for beanList.count.", message);
-    }
-
-    public void testCustomIndexedClassConversionErrorMessage() {
-        SimpleAction action = new SimpleAction();
-        container.inject(action);
-
-        stack.push(action);
-
-        String message = XWorkConverter.getConversionErrorMessage("beanList[0].birth", Date.class, stack);
-        assertNotNull(message);
-        assertEquals("Custom error message for java.util.Date.", message);
     }
 
     public void testLocalizedDateConversion() throws Exception {
@@ -466,7 +389,7 @@ public class XWorkConverterTest extends XWorkTestCase {
             Thread.currentThread().setContextClassLoader(new ClassLoader(cl) {
                 @Override
                 public Enumeration<URL> getResources(String name) throws IOException {
-                    if ("struts-conversion.properties".equals(name)) {
+                    if ("xwork-conversion.properties".equals(name)) {
                         return new Enumeration<URL>() {
                             boolean done = false;
                             public boolean hasMoreElements() {
@@ -481,7 +404,7 @@ public class XWorkConverterTest extends XWorkTestCase {
                                 }
 
                                 done = true;
-                                return getClass().getResource("/com/opensymphony/xwork2/conversion/impl/test-struts-conversion.properties");
+                                return getClass().getResource("/com/opensymphony/xwork2/conversion/impl/test-xwork-conversion.properties");
                             }
                         };
                     } else {

@@ -34,7 +34,7 @@ lables
      errorFor="${parameters.id}"<#rt/>
     </#if>
     class="errorMessage">
-             ${error}
+             ${error?html}
     </div><#t/>
 </#list>
 </div><#t/>
@@ -49,14 +49,14 @@ lables
 <#if parameters.id??>id="wwlbl_${parameters.id}"<#rt/></#if> class="wwlbl">
 <label<#t/>
 <#if parameters.id??>
- for="${parameters.id}"<#rt/>
+ for="${parameters.id?html}"<#rt/>
 </#if>
 <#if hasFieldErrors>
  class="checkboxErrorLabel"<#rt/>
 <#else>
  class="label"<#rt/>
 </#if>
->${parameters.label}</label><#rt/>
+>${parameters.label?html}</label><#rt/>
 </span>
 </#if>
 
@@ -87,14 +87,14 @@ lables
 <#if parameters.id??>id="wwlbl_${parameters.id}"<#rt/></#if> class="wwlbl">
 <label<#t/>
 <#if parameters.id??>
- for="${parameters.id}"<#rt/>
+ for="${parameters.id?html}"<#rt/>
 </#if>
 <#if hasFieldErrors>
  class="checkboxErrorLabel"<#rt/>
 <#else>
  class="checkboxLabel"<#rt/>
 </#if>
->${parameters.label}</label><#rt/>
+>${parameters.label?html}</label><#rt/>
 </#if>
 </#if>
 <#if parameters.label??>

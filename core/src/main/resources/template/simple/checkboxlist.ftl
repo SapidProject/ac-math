@@ -59,11 +59,11 @@
           <#assign itemTitle = ''/>
         </#if>
     </#if>
-<input type="checkbox" name="${parameters.name}" value="${itemKeyStr}"<#rt/>
+<input type="checkbox" name="${parameters.name?html}" value="${itemKeyStr?html}"<#rt/>
     <#if parameters.id?has_content>
-       id="${parameters.id}-${itemCount}"<#rt/>
+       id="${parameters.id?html}-${itemCount}"<#rt/>
     <#else>
-       id="${parameters.name}-${itemCount}"<#rt/>
+       id="${parameters.name?html}-${itemCount}"<#rt/>
     </#if>
     <#if tag.contains(parameters.nameValue, itemKey)>
        checked="checked"<#rt/>
@@ -72,24 +72,24 @@
        disabled="disabled"<#rt/>
     </#if>
     <#if itemCssClass??>
-     class="${itemCssClass}"<#rt/>
+     class="${itemCssClass?html}"<#rt/>
     <#else>
         <#if parameters.cssClass?has_content>
-     class="${parameters.cssClass}"<#rt/>
+     class="${parameters.cssClass?html}"<#rt/>
         </#if>
     </#if>
     <#if itemCssStyle??>
-     style="${itemCssStyle}"<#rt/>
+     style="${itemCssStyle?html}"<#rt/>
     <#else>
         <#if parameters.cssStyle?has_content>
-     style="${parameters.cssStyle}"<#rt/>
+     style="${parameters.cssStyle?html}"<#rt/>
         </#if>
     </#if>
     <#if itemTitle??>
-     title="${itemTitle}"<#rt/>
+     title="${itemTitle?html}"<#rt/>
     <#else>
         <#if parameters.title?has_content>
-     title="${parameters.title}"<#rt/>
+     title="${parameters.title?html}"<#rt/>
         </#if>
     </#if>
     <#include "/${parameters.templateDir}/${parameters.expandTheme}/css.ftl" />
@@ -99,16 +99,16 @@
         />
 <label<#rt/> 
     <#if parameters.id?has_content>
-        for="${parameters.id}-${itemCount}"<#rt/>
+        for="${parameters.id?html}-${itemCount}"<#rt/>
     <#else>
-        for="${parameters.name}-${itemCount}"<#rt/>
+        for="${parameters.name?html}-${itemCount}"<#rt/>
     </#if>
-        class="checkboxLabel">${itemValue}</label>
+        class="checkboxLabel">${itemValue?html}</label>
 </@s.iterator>
     <#else>
     &nbsp;
 </#if>
-<input type="hidden" id="__multiselect_${parameters.id}" name="__multiselect_${parameters.name}"
+<input type="hidden" id="__multiselect_${parameters.id?html}" name="__multiselect_${parameters.name?html}"
        value=""<#rt/>
 <#if parameters.disabled!false>
        disabled="disabled"<#rt/>

@@ -74,10 +74,6 @@ public abstract class XWorkJUnit4TestCase {
                         return impl;
                     }
 
-                    @Override
-                    public Class type() {
-                        return impl.getClass();
-                    }
                 }, Scope.SINGLETON);
             }
         });

@@ -19,12 +19,12 @@
 package com.opensymphony.xwork2.conversion.impl;
 
 import com.opensymphony.xwork2.ActionContext;
+import com.opensymphony.xwork2.LocaleProvider;
 import com.opensymphony.xwork2.LocaleProviderFactory;
 import com.opensymphony.xwork2.conversion.TypeConverter;
 import com.opensymphony.xwork2.inject.Container;
 import com.opensymphony.xwork2.inject.Inject;
 import com.opensymphony.xwork2.ognl.XWorkTypeConverterWrapper;
-import ognl.OgnlContext;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Member;
@@ -44,16 +44,16 @@ import java.util.Map;
  */
 public abstract class DefaultTypeConverter implements TypeConverter {
 
-    protected static final String MILLISECOND_FORMAT = ".SSS";
+    protected static String MILLISECOND_FORMAT = ".SSS";
 
     private static final String NULL_STRING = "null";
 
-    private static final Map<Class<?>, Object> baseTypeDefaults;
+    private static final Map<Class, Object> primitiveDefaults;
 
     private Container container;
 
     static {
-        Map<Class<?>, Object> map = new HashMap<>();
+        Map<Class, Object> map = new HashMap<>();
         map.put(Boolean.TYPE, Boolean.FALSE);
         map.put(Byte.TYPE, Byte.valueOf((byte) 0));
         map.put(Short.TYPE, Short.valueOf((short) 0));
@@ -62,9 +62,9 @@ public abstract class DefaultTypeConverter implements TypeConverter {
         map.put(Long.TYPE, Long.valueOf(0L));
         map.put(Float.TYPE, new Float(0.0f));
         map.put(Double.TYPE, new Double(0.0));
-        map.put(BigInteger.class, BigInteger.ZERO);
-        map.put(BigDecimal.class, BigDecimal.ZERO);
-        baseTypeDefaults = Collections.unmodifiableMap(map);
+        map.put(BigInteger.class, new BigInteger("0"));
+        map.put(BigDecimal.class, new BigDecimal(0.0));
+        primitiveDefaults = Collections.unmodifiableMap(map);
     }
 
     @Inject
@@ -76,28 +76,22 @@ public abstract class DefaultTypeConverter implements TypeConverter {
         return convertValue(value, toType);
     }
 
-    @Override
     public Object convertValue(Map<String, Object> context, Object target, Member member,
             String propertyName, Object value, Class toType) {
         return convertValue(context, value, toType);
     }
     
-    public TypeConverter getTypeConverter( Map<String, Object> context ) {
-        ognl.TypeConverter converter = null;
-
-        if (context instanceof OgnlContext) {
-            converter = ((OgnlContext) context).getTypeConverter();
+    public TypeConverter getTypeConverter( Map<String, Object> context )
+    {
+        Object obj = context.get(TypeConverter.TYPE_CONVERTER_CONTEXT_KEY);
+        if (obj instanceof TypeConverter) {
+            return (TypeConverter) obj;
+            
+        // for backwards-compatibility
+        } else if (obj instanceof ognl.TypeConverter) {
+            return new XWorkTypeConverterWrapper((ognl.TypeConverter) obj);
         }
-
-        if (converter != null) {
-            if (converter instanceof TypeConverter) {
-                return (TypeConverter) converter;
-            } else {
-                return new XWorkTypeConverterWrapper(converter);
-            }
-        }
-
-        return null;
+        return null; 
     }
 
     /**
@@ -119,7 +113,7 @@ public abstract class DefaultTypeConverter implements TypeConverter {
         if (value != null) {
             /* If array -> array then convert components of array individually */
             if (value.getClass().isArray() && toType.isArray()) {
-                final Class<?> componentType = toType.getComponentType();
+                Class componentType = toType.getComponentType();
 
                 result = Array.newInstance(componentType, Array
                         .getLength(value));
@@ -154,7 +148,9 @@ public abstract class DefaultTypeConverter implements TypeConverter {
                     result = enumValue(toType, value);
             }
         } else {
-            result = baseTypeDefaults.get(toType);
+            if (toType.isPrimitive()) {
+                result = primitiveDefaults.get(toType);
+            }
         }
         return result;
     }
@@ -171,7 +167,7 @@ public abstract class DefaultTypeConverter implements TypeConverter {
     public static boolean booleanValue(Object value) {
         if (value == null)
             return false;
-        final Class<?> c = value.getClass();
+        Class c = value.getClass();
         if (c == Boolean.class)
             return (Boolean) value;
         // if ( c == String.class )
@@ -201,11 +197,13 @@ public abstract class DefaultTypeConverter implements TypeConverter {
      * @param value
      *            an object to interpret as a long integer
      * @return the long integer value implied by the given object
+     * @throws NumberFormatException
+     *             if the given object can't be understood as a long integer
      */
-    public static long longValue(Object value) {
+    public static long longValue(Object value) throws NumberFormatException {
         if (value == null)
             return 0L;
-        final Class<?> c = value.getClass();
+        Class c = value.getClass();
         if (c.getSuperclass() == Number.class)
             return ((Number) value).longValue();
         if (c == Boolean.class)
@@ -221,19 +219,26 @@ public abstract class DefaultTypeConverter implements TypeConverter {
      * @param value
      *            an object to interpret as a double
      * @return the double value implied by the given object
+     * @throws NumberFormatException
+     *             if the given object can't be understood as a double
      */
-    public static double doubleValue(Object value) {
+    public static double doubleValue(Object value) throws NumberFormatException {
         if (value == null)
             return 0.0;
-        final Class<?> c = value.getClass();
+        Class c = value.getClass();
         if (c.getSuperclass() == Number.class)
             return ((Number) value).doubleValue();
         if (c == Boolean.class)
             return (Boolean) value ? 1 : 0;
         if (c == Character.class)
             return (Character) value;
-        final String s = stringValue(value, true);
+        String s = stringValue(value, true);
+
         return (s.length() == 0) ? 0.0 : Double.parseDouble(s);
+        /*
+         * For 1.1 parseDouble() is not available
+         */
+        // return Double.valueOf( value.toString() ).doubleValue();
     }
 
     /**
@@ -242,11 +247,14 @@ public abstract class DefaultTypeConverter implements TypeConverter {
      * @param value
      *            an object to interpret as a BigInteger
      * @return the BigInteger value implied by the given object
+     * @throws NumberFormatException
+     *             if the given object can't be understood as a BigInteger
      */
-    public static BigInteger bigIntValue(Object value) {
+    public static BigInteger bigIntValue(Object value)
+            throws NumberFormatException {
         if (value == null)
             return BigInteger.valueOf(0L);
-        final Class<?> c = value.getClass();
+        Class c = value.getClass();
         if (c == BigInteger.class)
             return (BigInteger) value;
         if (c == BigDecimal.class)
@@ -266,17 +274,20 @@ public abstract class DefaultTypeConverter implements TypeConverter {
      * @param value
      *            an object to interpret as a BigDecimal
      * @return the BigDecimal value implied by the given object
+     * @throws NumberFormatException
+     *             if the given object can't be understood as a BigDecimal
      */
-    public static BigDecimal bigDecValue(Object value) {
+    public static BigDecimal bigDecValue(Object value)
+            throws NumberFormatException {
         if (value == null)
             return BigDecimal.valueOf(0L);
-        final Class<?> c = value.getClass();
+        Class c = value.getClass();
         if (c == BigDecimal.class)
             return (BigDecimal) value;
         if (c == BigInteger.class)
             return new BigDecimal((BigInteger) value);
         if (c.getSuperclass() == Number.class)
-            return BigDecimal.valueOf(((Number) value).doubleValue());
+            return new BigDecimal(((Number) value).doubleValue());
         if (c == Boolean.class)
             return BigDecimal.valueOf((Boolean) value ? 1 : 0);
         if (c == Character.class)

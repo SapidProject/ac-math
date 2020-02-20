@@ -18,14 +18,6 @@
  */
 package com.opensymphony.xwork2.util.location;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.apache.struts2.config.StrutsJavaConfiguration;
-import org.apache.struts2.config.entities.BeanConfig;
-import org.apache.struts2.config.entities.BeanSelectionConfig;
-import org.apache.struts2.config.entities.ConstantConfig;
-
 import junit.framework.TestCase;
 
 public class LocationUtilsTest extends TestCase {
@@ -60,30 +52,5 @@ public class LocationUtilsTest extends TestCase {
     		assertTrue("Wrong sysId: "+loc.getURI(),
     				"com/opensymphony/xwork2/util/location/LocationUtilsTest.java"
     				.equals(loc.getURI()));
-    }
-
-    public void testGetLocationStrutsJavaConfiguration() throws Exception {
-        StrutsJavaConfiguration conf = new StrutsJavaConfiguration() {
-            @Override
-            public List<String> unknownHandlerStack() {
-                return null;
-            }
-            @Override
-            public List<ConstantConfig> constants() {
-                return null;
-            }
-            @Override
-            public List<BeanConfig> beans() {
-                return null;
-            }
-            @Override
-            public Optional<BeanSelectionConfig> beanSelection() {
-                return Optional.empty();
-            }
-        };
-        Location loc = LocationUtils.getLocation(conf, null);
-
-        assertNotNull(loc);
-        assertEquals(conf.toString(), loc.getURI());
     }
 }

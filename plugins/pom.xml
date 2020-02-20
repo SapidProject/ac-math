@@ -29,10 +29,9 @@
 
     <artifactId>struts2-plugins</artifactId>
     <packaging>pom</packaging>
-    <name>Struts 2 Plugins</name>
+    <name>Struts Plugins</name>
 
     <modules>
-        <module>async</module>
         <module>bean-validation</module>
         <module>cdi</module>
         <module>config-browser</module>
@@ -52,11 +51,11 @@
         <module>portlet</module>
         <module>portlet-tiles</module>
         <module>rest</module>
+        <module>sitegraph</module>
         <module>sitemesh</module>
         <module>spring</module>
         <module>testng</module>
         <module>tiles</module>
-        <module>velocity</module>
     </modules>
 
     <dependencies>

@@ -39,6 +39,7 @@ import com.opensymphony.xwork2.FileManagerFactory;
 import com.opensymphony.xwork2.ObjectFactory;
 import com.opensymphony.xwork2.TextProvider;
 import com.opensymphony.xwork2.UnknownHandlerManager;
+import com.opensymphony.xwork2.XWorkConstants;
 import com.opensymphony.xwork2.config.Configuration;
 import com.opensymphony.xwork2.config.ConfigurationException;
 import com.opensymphony.xwork2.config.ConfigurationProvider;
@@ -54,10 +55,10 @@ import com.opensymphony.xwork2.conversion.impl.CollectionConverter;
 import com.opensymphony.xwork2.conversion.impl.DateConverter;
 import com.opensymphony.xwork2.conversion.impl.DefaultConversionAnnotationProcessor;
 import com.opensymphony.xwork2.conversion.impl.DefaultConversionFileProcessor;
-import org.apache.struts2.conversion.StrutsConversionPropertiesProcessor;
+import com.opensymphony.xwork2.conversion.impl.DefaultConversionPropertiesProcessor;
 import com.opensymphony.xwork2.conversion.impl.DefaultObjectTypeDeterminer;
-import org.apache.struts2.conversion.StrutsTypeConverterCreator;
-import org.apache.struts2.conversion.StrutsTypeConverterHolder;
+import com.opensymphony.xwork2.conversion.impl.DefaultTypeConverterCreator;
+import com.opensymphony.xwork2.conversion.impl.DefaultTypeConverterHolder;
 import com.opensymphony.xwork2.conversion.impl.InstantiatingNullHandler;
 import com.opensymphony.xwork2.conversion.impl.NumberConverter;
 import com.opensymphony.xwork2.conversion.impl.StringConverter;
@@ -66,7 +67,7 @@ import com.opensymphony.xwork2.conversion.impl.XWorkConverter;
 import com.opensymphony.xwork2.factory.ActionFactory;
 import com.opensymphony.xwork2.factory.ConverterFactory;
 import com.opensymphony.xwork2.factory.DefaultActionFactory;
-import com.opensymphony.xwork2.factory.StrutsConverterFactory;
+import com.opensymphony.xwork2.factory.DefaultConverterFactory;
 import com.opensymphony.xwork2.factory.DefaultInterceptorFactory;
 import com.opensymphony.xwork2.factory.DefaultResultFactory;
 import com.opensymphony.xwork2.factory.InterceptorFactory;
@@ -147,7 +148,7 @@ public class XWorkConfigurationProvider implements ConfigurationProvider {
                 .factory(ResultFactory.class, DefaultResultFactory.class)
                 .factory(InterceptorFactory.class, DefaultInterceptorFactory.class)
                 .factory(com.opensymphony.xwork2.factory.ValidatorFactory.class, com.opensymphony.xwork2.factory.DefaultValidatorFactory.class)
-                .factory(ConverterFactory.class, StrutsConverterFactory.class)
+                .factory(ConverterFactory.class, DefaultConverterFactory.class)
                 .factory(UnknownHandlerFactory.class, DefaultUnknownHandlerFactory.class)
 
                 .factory(ActionProxyFactory.class, DefaultActionProxyFactory.class, Scope.SINGLETON)
@@ -155,11 +156,11 @@ public class XWorkConfigurationProvider implements ConfigurationProvider {
 
                 .factory(XWorkConverter.class, Scope.SINGLETON)
                 .factory(XWorkBasicConverter.class, Scope.SINGLETON)
-                .factory(ConversionPropertiesProcessor.class, StrutsConversionPropertiesProcessor.class, Scope.SINGLETON)
+                .factory(ConversionPropertiesProcessor.class, DefaultConversionPropertiesProcessor.class, Scope.SINGLETON)
                 .factory(ConversionFileProcessor.class, DefaultConversionFileProcessor.class, Scope.SINGLETON)
                 .factory(ConversionAnnotationProcessor.class, DefaultConversionAnnotationProcessor.class, Scope.SINGLETON)
-                .factory(TypeConverterCreator.class, StrutsTypeConverterCreator.class, Scope.SINGLETON)
-                .factory(TypeConverterHolder.class, StrutsTypeConverterHolder.class, Scope.SINGLETON)
+                .factory(TypeConverterCreator.class, DefaultTypeConverterCreator.class, Scope.SINGLETON)
+                .factory(TypeConverterHolder.class, DefaultTypeConverterHolder.class, Scope.SINGLETON)
 
                 .factory(FileManager.class, "system", DefaultFileManager.class, Scope.SINGLETON)
                 .factory(FileManagerFactory.class, DefaultFileManagerFactory.class, Scope.SINGLETON)
@@ -219,12 +220,11 @@ public class XWorkConfigurationProvider implements ConfigurationProvider {
         props.setProperty(StrutsConstants.STRUTS_ENABLE_DYNAMIC_METHOD_INVOCATION, Boolean.FALSE.toString());
         props.setProperty(StrutsConstants.STRUTS_I18N_RELOAD, Boolean.FALSE.toString());
         props.setProperty(StrutsConstants.STRUTS_DEVMODE, Boolean.FALSE.toString());
-        props.setProperty(StrutsConstants.STRUTS_LOG_MISSING_PROPERTIES, Boolean.FALSE.toString());
-        props.setProperty(StrutsConstants.STRUTS_ENABLE_OGNL_EXPRESSION_CACHE, Boolean.TRUE.toString());
-        props.setProperty(StrutsConstants.STRUTS_ENABLE_OGNL_EVAL_EXPRESSION, Boolean.FALSE.toString());
-        props.setProperty(StrutsConstants.STRUTS_CONFIGURATION_XML_RELOAD, Boolean.FALSE.toString());
-        props.setProperty(StrutsConstants.STRUTS_ALLOW_STATIC_METHOD_ACCESS, Boolean.FALSE.toString());
-        props.setProperty(StrutsConstants.STRUTS_ALLOW_STATIC_FIELD_ACCESS, Boolean.TRUE.toString());
+        props.setProperty(XWorkConstants.DEV_MODE, Boolean.FALSE.toString());
+        props.setProperty(XWorkConstants.LOG_MISSING_PROPERTIES, Boolean.FALSE.toString());
+        props.setProperty(XWorkConstants.ENABLE_OGNL_EXPRESSION_CACHE, Boolean.TRUE.toString());
+        props.setProperty(XWorkConstants.ENABLE_OGNL_EVAL_EXPRESSION, Boolean.FALSE.toString());
+        props.setProperty(XWorkConstants.RELOAD_XML_CONFIGURATION, Boolean.FALSE.toString());
     }
 
 }

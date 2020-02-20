@@ -18,50 +18,31 @@
  */
 package com.opensymphony.xwork2.config.providers;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-
-import org.apache.commons.lang3.SystemUtils;
 import org.apache.struts2.StrutsInternalTestCase;
+
 
 public class EnvsValueSubstitutorTest extends StrutsInternalTestCase {
 
-    private ValueSubstitutor substitutor;
+    public void testSimpleValue() throws Exception {
+        // given
+        String expected = System.getenv("USER");
+        ValueSubstitutor substitutor = new EnvsValueSubstitutor();
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        substitutor = new EnvsValueSubstitutor();
+        // when
+        String actual = substitutor.substitute("${env.USER}");
+
+        // then
+        assertEquals(expected, actual);
     }
 
-    public void testEnvSimpleValue() {
-        if (SystemUtils.IS_OS_WINDOWS) {
-            assertThat(substitutor.substitute("${env.USERNAME}"), is(System.getenv("USERNAME")));
-        } else {
-            assertThat(substitutor.substitute("${env.USER}"), is(System.getenv("USER")));
-        }
-    }
+    public void testNoSubstitution() throws Exception {
+        // given
+        ValueSubstitutor substitutor = new EnvsValueSubstitutor();
 
-    public void testEnvSimpleDefaultValue() {
-        final String defaultValue = "defaultValue";
-        assertThat(substitutor.substitute("${env.UNKNOWN:" + defaultValue + "}"), is(defaultValue));
-    }
+        // when
+        String actual = substitutor.substitute("val1");
 
-    public void testSystemSimpleValue() {
-        final String key = "sysPropKey";
-        final String value = "sysPropValue";
-        System.setProperty(key, value);
-
-        assertThat(substitutor.substitute("${" + key + "}"), is(value));
-    }
-
-    public void testSystemSimpleDefaultValue() {
-        final String defaultValue = "defaultValue";
-        assertThat(substitutor.substitute("${UNKNOWN:" + defaultValue + "}"), is(defaultValue));
-    }
-
-    public void testNoSubstitution() {
-        final String value = "val1";
-        assertThat(substitutor.substitute(value), is(value));
+        // then
+        assertEquals("val1", actual);
     }
 }

@@ -18,10 +18,6 @@
  */
 package com.opensymphony.xwork2.util;
 
-import com.opensymphony.xwork2.conversion.annotations.ConversionRule;
-import com.opensymphony.xwork2.conversion.annotations.ConversionType;
-import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
-
 import java.util.*;
 
 
@@ -38,11 +34,9 @@ public class Foo {
     Date meeting;
     Foo child;
     List cats;
-    List annotatedCats;
     List moreCats;
     List strings;
     Collection barCollection;
-    Collection annotatedBarCollection;
     Map catMap;
     Map anotherCatMap;
     String title;
@@ -53,7 +47,6 @@ public class Foo {
     long aLong;
     Calendar calendar;
     BarJunior barJunior;
-    Map<MyNumber, Animal> animalMap;
 
     public BarJunior getBarJunior() {
         return barJunior;
@@ -101,15 +94,6 @@ public class Foo {
 
     public List getCats() {
         return cats;
-    }
-
-    public void setAnnotatedCats(List annotatedCats) {
-        this.annotatedCats = annotatedCats;
-    }
-
-    @TypeConversion(rule = ConversionRule.ELEMENT, converterClass = Cat.class)
-    public List getAnnotatedCats() {
-        return annotatedCats;
     }
 
     public void setChild(Foo child) {
@@ -168,16 +152,6 @@ public class Foo {
      */
     public void setBarCollection(Collection barCollection) {
         this.barCollection = barCollection;
-    }
-
-    @TypeConversion(rule = ConversionRule.KEY_PROPERTY, value = "id")
-    public void setAnnotatedBarCollection(Collection annotatedBarCollection) {
-        this.annotatedBarCollection = annotatedBarCollection;
-    }
-
-    @TypeConversion(rule = ConversionRule.ELEMENT, converter = "com.opensymphony.xwork2.util.Bar")
-    public Collection getAnnotatedBarCollection() {
-        return annotatedBarCollection;
     }
 
     public void setPoints(long[] points) {
@@ -243,13 +217,5 @@ public class Foo {
 
     public void setCalendar(Calendar calendar) {
         this.calendar = calendar;
-    }
-
-    public Map<MyNumber, Animal> getAnimalMap() {
-        return animalMap;
-    }
-
-    public void setAnimalMap(Map<MyNumber, Animal> animalMap) {
-        this.animalMap = animalMap;
-    }
+    }     
 }

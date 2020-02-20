@@ -52,11 +52,6 @@ public class LocatableFactory<T> extends Located implements Factory<T> {
     }
 
     @Override
-    public Class<? extends T> type() {
-        return implementation;
-    }
-
-    @Override
     public String toString() {
         String fields = new LinkedHashMap<String, Object>() {
             {

@@ -24,7 +24,6 @@ import com.opensymphony.xwork2.config.entities.ActionConfig;
 import com.opensymphony.xwork2.config.entities.ExceptionMappingConfig;
 import com.opensymphony.xwork2.util.ValueStack;
 import com.opensymphony.xwork2.validator.ValidationException;
-import org.apache.struts2.StrutsException;
 
 import java.util.HashMap;
 
@@ -45,9 +44,9 @@ public class ExceptionMappingInterceptorTest extends XWorkTestCase {
         this.setUpWithExceptionMappings();
 
         Mock action = new Mock(Action.class);
-        Exception exception = new StrutsException("test");
+        Exception exception = new XWorkException("test");
         mockInvocation.expectAndThrow("invoke", exception);
-        mockInvocation.matchAndReturn("getAction", action.proxy());
+        mockInvocation.matchAndReturn("getAction", ((Action) action.proxy()));
         String result = interceptor.intercept(invocation);
         assertNotNull(stack.findValue("exception"));
         assertEquals(stack.findValue("exception"), exception);
@@ -62,7 +61,7 @@ public class ExceptionMappingInterceptorTest extends XWorkTestCase {
         Mock action = new Mock(Action.class);
         Exception exception = new ValidationException("test");
         mockInvocation.expectAndThrow("invoke", exception);
-        mockInvocation.matchAndReturn("getAction", action.proxy());
+        mockInvocation.matchAndReturn("getAction", ((Action) action.proxy()));
         String result = interceptor.intercept(invocation);
         assertNotNull(stack.findValue("exception"));
         assertEquals(stack.findValue("exception"), exception);
@@ -74,19 +73,19 @@ public class ExceptionMappingInterceptorTest extends XWorkTestCase {
 
         Mock action = new Mock(Action.class);
         mockInvocation.expectAndReturn("invoke", Action.SUCCESS);
-        mockInvocation.matchAndReturn("getAction", action.proxy());
+        mockInvocation.matchAndReturn("getAction", ((Action) action.proxy()));
         String result = interceptor.intercept(invocation);
         assertEquals(result, Action.SUCCESS);
         assertNull(stack.findValue("exception"));
     }
 
-    public void testThrownExceptionNoMatch() {
+    public void testThrownExceptionNoMatch() throws Exception {
         this.setupWithoutExceptionMappings();
 
         Mock action = new Mock(Action.class);
         Exception exception = new Exception("test");
         mockInvocation.expectAndThrow("invoke", exception);
-        mockInvocation.matchAndReturn("getAction", action.proxy());
+        mockInvocation.matchAndReturn("getAction", ((Action) action.proxy()));
 
         try {
             interceptor.intercept(invocation);
@@ -96,13 +95,13 @@ public class ExceptionMappingInterceptorTest extends XWorkTestCase {
         }
     }
 
-    public void testThrownExceptionNoMatchLogging() {
+    public void testThrownExceptionNoMatchLogging() throws Exception {
         this.setupWithoutExceptionMappings();
 
         Mock action = new Mock(Action.class);
         Exception exception = new Exception("test");
         mockInvocation.expectAndThrow("invoke", exception);
-        mockInvocation.matchAndReturn("getAction", action.proxy());
+        mockInvocation.matchAndReturn("getAction", ((Action) action.proxy()));
 
         try {
         	interceptor.setLogEnabled(true);
@@ -113,13 +112,13 @@ public class ExceptionMappingInterceptorTest extends XWorkTestCase {
         }
     }
 
-    public void testThrownExceptionNoMatchLoggingCategory() {
+    public void testThrownExceptionNoMatchLoggingCategory() throws Exception {
         this.setupWithoutExceptionMappings();
 
         Mock action = new Mock(Action.class);
         Exception exception = new Exception("test");
         mockInvocation.expectAndThrow("invoke", exception);
-        mockInvocation.matchAndReturn("getAction", action.proxy());
+        mockInvocation.matchAndReturn("getAction", ((Action) action.proxy()));
 
         try {
         	interceptor.setLogEnabled(true);
@@ -131,13 +130,13 @@ public class ExceptionMappingInterceptorTest extends XWorkTestCase {
         }
     }
 
-    public void testThrownExceptionNoMatchLoggingCategoryLevelFatal() {
+    public void testThrownExceptionNoMatchLoggingCategoryLevelFatal() throws Exception {
         this.setupWithoutExceptionMappings();
 
         Mock action = new Mock(Action.class);
         Exception exception = new Exception("test");
         mockInvocation.expectAndThrow("invoke", exception);
-        mockInvocation.matchAndReturn("getAction", action.proxy());
+        mockInvocation.matchAndReturn("getAction", ((Action) action.proxy()));
 
         try {
         	interceptor.setLogEnabled(true);
@@ -150,17 +149,17 @@ public class ExceptionMappingInterceptorTest extends XWorkTestCase {
         }
         
         assertEquals("fatal", interceptor.getLogLevel());
-        assertTrue(interceptor.isLogEnabled());
+        assertEquals(true, interceptor.isLogEnabled());
         assertEquals("showcase.unhandled", interceptor.getLogCategory());
     }
 
-    public void testThrownExceptionNoMatchLoggingCategoryLevelError() {
+    public void testThrownExceptionNoMatchLoggingCategoryLevelError() throws Exception {
         this.setupWithoutExceptionMappings();
 
         Mock action = new Mock(Action.class);
         Exception exception = new Exception("test");
         mockInvocation.expectAndThrow("invoke", exception);
-        mockInvocation.matchAndReturn("getAction", action.proxy());
+        mockInvocation.matchAndReturn("getAction", ((Action) action.proxy()));
 
         try {
         	interceptor.setLogEnabled(true);
@@ -173,13 +172,13 @@ public class ExceptionMappingInterceptorTest extends XWorkTestCase {
         }
     }
 
-    public void testThrownExceptionNoMatchLoggingCategoryLevelWarn() {
+    public void testThrownExceptionNoMatchLoggingCategoryLevelWarn() throws Exception {
         this.setupWithoutExceptionMappings();
 
         Mock action = new Mock(Action.class);
         Exception exception = new Exception("test");
         mockInvocation.expectAndThrow("invoke", exception);
-        mockInvocation.matchAndReturn("getAction", action.proxy());
+        mockInvocation.matchAndReturn("getAction", ((Action) action.proxy()));
 
         try {
         	interceptor.setLogEnabled(true);
@@ -192,13 +191,13 @@ public class ExceptionMappingInterceptorTest extends XWorkTestCase {
         }
     }
 
-    public void testThrownExceptionNoMatchLoggingCategoryLevelInfo() {
+    public void testThrownExceptionNoMatchLoggingCategoryLevelInfo() throws Exception {
         this.setupWithoutExceptionMappings();
 
         Mock action = new Mock(Action.class);
         Exception exception = new Exception("test");
         mockInvocation.expectAndThrow("invoke", exception);
-        mockInvocation.matchAndReturn("getAction", action.proxy());
+        mockInvocation.matchAndReturn("getAction", ((Action) action.proxy()));
 
         try {
         	interceptor.setLogEnabled(true);
@@ -211,13 +210,13 @@ public class ExceptionMappingInterceptorTest extends XWorkTestCase {
         }
     }
 
-    public void testThrownExceptionNoMatchLoggingCategoryLevelDebug() {
+    public void testThrownExceptionNoMatchLoggingCategoryLevelDebug() throws Exception {
         this.setupWithoutExceptionMappings();
 
         Mock action = new Mock(Action.class);
         Exception exception = new Exception("test");
         mockInvocation.expectAndThrow("invoke", exception);
-        mockInvocation.matchAndReturn("getAction", action.proxy());
+        mockInvocation.matchAndReturn("getAction", ((Action) action.proxy()));
 
         try {
         	interceptor.setLogEnabled(true);
@@ -230,13 +229,13 @@ public class ExceptionMappingInterceptorTest extends XWorkTestCase {
         }
     }
 
-    public void testThrownExceptionNoMatchLoggingCategoryLevelTrace() {
+    public void testThrownExceptionNoMatchLoggingCategoryLevelTrace() throws Exception {
         this.setupWithoutExceptionMappings();
 
         Mock action = new Mock(Action.class);
         Exception exception = new Exception("test");
         mockInvocation.expectAndThrow("invoke", exception);
-        mockInvocation.matchAndReturn("getAction", action.proxy());
+        mockInvocation.matchAndReturn("getAction", ((Action) action.proxy()));
 
         try {
         	interceptor.setLogEnabled(true);
@@ -255,7 +254,7 @@ public class ExceptionMappingInterceptorTest extends XWorkTestCase {
         Mock action = new Mock(Action.class);
         Exception exception = new Exception("test");
         mockInvocation.expectAndThrow("invoke", exception);
-        mockInvocation.matchAndReturn("getAction", action.proxy());
+        mockInvocation.matchAndReturn("getAction", ((Action) action.proxy()));
 
         try {
         	interceptor.setLogEnabled(true);
@@ -271,18 +270,18 @@ public class ExceptionMappingInterceptorTest extends XWorkTestCase {
         ActionConfig actionConfig = new ActionConfig.Builder("", "", "").build();
         Mock actionProxy = new Mock(ActionProxy.class);
         actionProxy.expectAndReturn("getConfig", actionConfig);
-        mockInvocation.expectAndReturn("getProxy", actionProxy.proxy());
+        mockInvocation.expectAndReturn("getProxy", ((ActionProxy) actionProxy.proxy()));
         invocation = (ActionInvocation) mockInvocation.proxy();
     }
 
     private void setUpWithExceptionMappings() {
         ActionConfig actionConfig = new ActionConfig.Builder("", "", "")
-                .addExceptionMapping(new ExceptionMappingConfig.Builder("xwork", "org.apache.struts2.StrutsException", "spooky").build())
+                .addExceptionMapping(new ExceptionMappingConfig.Builder("xwork", "com.opensymphony.xwork2.XWorkException", "spooky").build())
                 .addExceptionMapping(new ExceptionMappingConfig.Builder("throwable", "java.lang.Throwable", "throwable").build())
                 .build();
         Mock actionProxy = new Mock(ActionProxy.class);
         actionProxy.expectAndReturn("getConfig", actionConfig);
-        mockInvocation.expectAndReturn("getProxy", actionProxy.proxy());
+        mockInvocation.expectAndReturn("getProxy", ((ActionProxy) actionProxy.proxy()));
 
         invocation = (ActionInvocation) mockInvocation.proxy();
     }
@@ -293,7 +292,7 @@ public class ExceptionMappingInterceptorTest extends XWorkTestCase {
         stack = ActionContext.getContext().getValueStack();
         mockInvocation = new Mock(ActionInvocation.class);
         mockInvocation.expectAndReturn("getStack", stack);
-        mockInvocation.expectAndReturn("getInvocationContext", new ActionContext(new HashMap<>()));
+        mockInvocation.expectAndReturn("getInvocationContext", new ActionContext(new HashMap<String, Object>()));
         interceptor = new ExceptionMappingInterceptor();
         interceptor.init();
     }

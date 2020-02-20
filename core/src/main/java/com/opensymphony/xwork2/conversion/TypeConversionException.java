@@ -18,7 +18,8 @@
  */
 package com.opensymphony.xwork2.conversion;
 
-import org.apache.struts2.StrutsException;
+import com.opensymphony.xwork2.XWorkException;
+
 
 /**
  * TypeConversionException should be thrown by any TypeConverters which fail to convert values
@@ -26,16 +27,16 @@ import org.apache.struts2.StrutsException;
  * @author Jason Carreira
  *         Created Oct 3, 2003 12:18:33 AM
  */
-public class TypeConversionException extends StrutsException {
+public class TypeConversionException extends XWorkException {
 
     /**
-     * Constructs a <code>StrutsException</code> with no detail message.
+     * Constructs a <code>XWorkException</code> with no detail message.
      */
     public TypeConversionException() {
     }
 
     /**
-     * Constructs a <code>StrutsException</code> with the specified
+     * Constructs a <code>XWorkException</code> with the specified
      * detail message.
      *
      * @param s the detail message.
@@ -45,7 +46,7 @@ public class TypeConversionException extends StrutsException {
     }
 
     /**
-     * Constructs a <code>StrutsException</code> with no detail  message.
+     * Constructs a <code>XWorkException</code> with no detail  message.
      * @param cause the cause
      */
     public TypeConversionException(Throwable cause) {
@@ -53,7 +54,7 @@ public class TypeConversionException extends StrutsException {
     }
 
     /**
-     * Constructs a <code>StrutsException</code> with the specified
+     * Constructs a <code>XWorkException</code> with the specified
      * detail message.
      *
      * @param s the detail message.

@@ -73,7 +73,6 @@ public class StrutsXmlConfigurationProvider extends XmlConfigurationProvider {
         dtdMappings.put("-//Apache Software Foundation//DTD Struts Configuration 2.1.7//EN", "struts-2.1.7.dtd");
         dtdMappings.put("-//Apache Software Foundation//DTD Struts Configuration 2.3//EN", "struts-2.3.dtd");
         dtdMappings.put("-//Apache Software Foundation//DTD Struts Configuration 2.5//EN", "struts-2.5.dtd");
-        dtdMappings.put("-//Apache Software Foundation//DTD Struts Configuration 2.6//EN", "struts-2.6.dtd");
         setDtdMappings(dtdMappings);
         File file = new File(filename);
         if (file.getParent() != null) {
@@ -90,9 +89,6 @@ public class StrutsXmlConfigurationProvider extends XmlConfigurationProvider {
             containerBuilder.factory(ServletContext.class, new Factory<ServletContext>() {
                 public ServletContext create(Context context) throws Exception {
                     return servletContext;
-                }
-                public Class<? extends ServletContext> type() {
-                    return servletContext.getClass();
                 }
             });
         }

@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.tagext.TagInfo;
 
+import org.apache.AnnotationProcessor;
 import org.apache.struts2.jasper.JasperException;
 import org.apache.struts2.jasper.JspCompilationContext;
 import org.apache.struts2.jasper.Options;
@@ -40,10 +41,8 @@ import org.apache.struts2.jasper.compiler.JavacErrorDetail;
 import org.apache.struts2.jasper.compiler.JspRuntimeContext;
 import org.apache.struts2.jasper.compiler.Localizer;
 import org.apache.struts2.jasper.runtime.JspSourceDependent;
-import org.apache.struts2.jasper.runtime.InstanceHelper;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
-import org.apache.tomcat.InstanceManager;
 
 /**
  * The JSP engine (a.k.a Jasper).
@@ -145,9 +144,10 @@ public class JspServletWrapper {
                     try {
                         servletClass = ctxt.load();
                         servlet = (Servlet) servletClass.newInstance();
-                        final InstanceManager instanceManager = InstanceHelper.getServletInstanceManager(config);
-                        if (instanceManager != null) {
-                            InstanceHelper.postConstruct(instanceManager, servlet);
+                        AnnotationProcessor annotationProcessor = (AnnotationProcessor) config.getServletContext().getAttribute(AnnotationProcessor.class.getName());
+                        if (annotationProcessor != null) {
+                           annotationProcessor.processAnnotations(servlet);
+                           annotationProcessor.postConstruct(servlet);
                         }
                     } catch (IllegalAccessException e) {
                         throw new JasperException(e);
@@ -424,10 +424,10 @@ public class JspServletWrapper {
     public void destroy() {
         if (theServlet != null) {
             theServlet.destroy();
-            final InstanceManager instanceManager = InstanceHelper.getServletInstanceManager(config);
-            if (instanceManager != null) {
+            AnnotationProcessor annotationProcessor = (AnnotationProcessor) config.getServletContext().getAttribute(AnnotationProcessor.class.getName());
+            if (annotationProcessor != null) {
                 try {
-                    InstanceHelper.preDestroy(instanceManager, theServlet);
+                    annotationProcessor.preDestroy(theServlet);
                 } catch (Exception e) {
                     // Log any exception, since it can't be passed along
                     log.error(Localizer.getMessage("jsp.error.file.not.found",

@@ -94,9 +94,9 @@ public class StrutsSpringObjectFactory extends SpringObjectFactory {
             return;
         }
         
-        String watchList = container.getInstance(String.class, SpringConstants.SPRING_CLASS_RELOADING_WATCH_LIST);
-        String acceptClasses = container.getInstance(String.class, SpringConstants.SPRING_CLASS_RELOADING_ACCEPT_CLASSES);
-        String reloadConfig = container.getInstance(String.class, SpringConstants.SPRING_CLASS_RELOADING_RELOAD_CONFIG);
+        String watchList = container.getInstance(String.class, "struts.class.reloading.watchList");
+        String acceptClasses = container.getInstance(String.class, "struts.class.reloading.acceptClasses");
+        String reloadConfig = container.getInstance(String.class, "struts.class.reloading.reloadConfig");
 
         if ("true".equals(devMode)
                 && StringUtils.isNotBlank(watchList)
@@ -104,17 +104,14 @@ public class StrutsSpringObjectFactory extends SpringObjectFactory {
             //prevent class caching
             useClassCache = false;
 
-            try (ClassReloadingXMLWebApplicationContext reloadingContext = (ClassReloadingXMLWebApplicationContext) appContext) {
-                reloadingContext.setupReloading(watchList.split(","), acceptClasses, servletContext,
-                        "true".equals(reloadConfig));
-                LOG.info("Class reloading is enabled. Make sure this is not used on a production environment!\n{}",
-                        watchList);
+            ClassReloadingXMLWebApplicationContext reloadingContext = (ClassReloadingXMLWebApplicationContext) appContext;
+            reloadingContext.setupReloading(watchList.split(","), acceptClasses, servletContext, "true".equals(reloadConfig));
+            LOG.info("Class reloading is enabled. Make sure this is not used on a production environment!\n{}", watchList);
 
-                setClassLoader(reloadingContext.getReloadingClassLoader());
+            setClassLoader(reloadingContext.getReloadingClassLoader());
 
-                // we need to reload the context, so our isntance of the factory is picked up
-                reloadingContext.refresh();
-            }
+            //we need to reload the context, so our isntance of the factory is picked up
+            reloadingContext.refresh();
         }
 
         this.setApplicationContext(appContext);

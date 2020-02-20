@@ -24,7 +24,7 @@
 <#if parameters.focusElement??>
 <script type="text/javascript">
     StrutsUtils.addOnLoad(function() {
-        var element = document.getElementById("${parameters.focusElement}");
+        var element = document.getElementById("${parameters.focusElement?html}");
         if(element) {
             element.focus();
         }
