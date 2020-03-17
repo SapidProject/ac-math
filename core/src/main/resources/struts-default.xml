@@ -45,12 +45,6 @@
                 java.lang.ClassLoader,
                 java.lang.Shutdown,
                 java.lang.ProcessBuilder,
-                ognl.OgnlContext,
-                ognl.ClassResolver,
-                ognl.TypeConverter,
-                ognl.MemberAccess,
-                ognl.DefaultMemberAccess,
-                com.opensymphony.xwork2.ognl.SecurityMemberAccess,
                 com.opensymphony.xwork2.ActionContext" />
 
     <!-- this must be valid regex, each '.' in package name must be escaped! -->
@@ -60,15 +54,17 @@
     <!-- this is simpler version of the above used with string comparison -->
     <constant name="struts.excludedPackageNames"
               value="
-                java.lang.,
                 ognl.,
-                javax,
+                javax.,
                 freemarker.core.,
                 freemarker.template.,
                 freemarker.ext.rhino.,
-                freemarker.ext.beans.,
                 sun.reflect.,
-                javassist." />
+                javassist.,
+                org.objectweb.asm.,
+                com.opensymphony.xwork2.ognl.,
+                com.opensymphony.xwork2.security.,
+                com.opensymphony.xwork2.util." />
 
     <bean class="com.opensymphony.xwork2.ObjectFactory" name="struts"/>
     <bean type="com.opensymphony.xwork2.factory.ResultFactory" name="struts" class="org.apache.struts2.factory.StrutsResultFactory" />
@@ -94,6 +90,7 @@
 
     <bean type="org.apache.struts2.dispatcher.mapper.ActionMapper" name="struts" class="org.apache.struts2.dispatcher.mapper.DefaultActionMapper" />
     <bean type="org.apache.struts2.dispatcher.mapper.ActionMapper" name="composite" class="org.apache.struts2.dispatcher.mapper.CompositeActionMapper" />
+    <bean type="org.apache.struts2.dispatcher.mapper.ActionMapper" name="prefix" class="org.apache.struts2.dispatcher.mapper.PrefixBasedActionMapper" />
     <bean type="org.apache.struts2.dispatcher.mapper.ActionMapper" name="restful" class="org.apache.struts2.dispatcher.mapper.RestfulActionMapper" />
     <bean type="org.apache.struts2.dispatcher.mapper.ActionMapper" name="restful2" class="org.apache.struts2.dispatcher.mapper.Restful2ActionMapper" />
 
@@ -176,8 +173,6 @@
 
     <bean type="org.apache.struts2.dispatcher.DispatcherErrorHandler" name="struts" class="org.apache.struts2.dispatcher.DefaultDispatcherErrorHandler" />
     
-    <constant name="struts.dispatcher.errorHandler" value="struts" />
-
     <!--  Silly workarounds for OGNL since there is currently no way to flush its internal caches -->
     <bean type="ognl.PropertyAccessor" name="java.util.ArrayList" class="com.opensymphony.xwork2.ognl.accessor.XWorkListPropertyAccessor" />
     <bean type="ognl.PropertyAccessor" name="java.util.HashSet" class="com.opensymphony.xwork2.ognl.accessor.XWorkCollectionPropertyAccessor" />
@@ -227,7 +222,6 @@
             <interceptor name="staticParams" class="com.opensymphony.xwork2.interceptor.StaticParametersInterceptor"/>
             <interceptor name="scope" class="org.apache.struts2.interceptor.ScopeInterceptor"/>
             <interceptor name="servletConfig" class="org.apache.struts2.interceptor.ServletConfigInterceptor"/>
-            <interceptor name="timer" class="com.opensymphony.xwork2.interceptor.TimerInterceptor"/>
             <interceptor name="token" class="org.apache.struts2.interceptor.TokenInterceptor"/>
             <interceptor name="tokenSession" class="org.apache.struts2.interceptor.TokenSessionStoreInterceptor"/>
             <interceptor name="validation" class="org.apache.struts2.interceptor.validation.AnnotationValidationInterceptor"/>
@@ -235,7 +229,6 @@
             <interceptor name="store" class="org.apache.struts2.interceptor.MessageStoreInterceptor" />
             <interceptor name="checkbox" class="org.apache.struts2.interceptor.CheckboxInterceptor" />
             <interceptor name="datetime" class="org.apache.struts2.interceptor.DateTextFieldInterceptor" />
-            <interceptor name="profiling" class="org.apache.struts2.interceptor.ProfilingActivationInterceptor" />
             <interceptor name="roles" class="org.apache.struts2.interceptor.RolesInterceptor" />
             <interceptor name="annotationWorkflow" class="com.opensymphony.xwork2.interceptor.annotations.AnnotationWorkflowInterceptor" />
             <interceptor name="annotationParameterFilter" class="com.opensymphony.xwork2.interceptor.annotations.AnnotationParameterFilterInterceptor" />

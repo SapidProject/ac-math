@@ -34,7 +34,6 @@ import com.opensymphony.xwork2.util.ValueStackFactory;
 import com.opensymphony.xwork2.util.location.LocatableProperties;
 import com.opensymphony.xwork2.util.location.Location;
 import com.opensymphony.xwork2.util.location.LocationUtils;
-import com.opensymphony.xwork2.util.profiling.UtilTimerStack;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -48,6 +47,8 @@ import org.apache.struts2.StrutsStatics;
 import org.apache.struts2.config.DefaultBeanSelectionProvider;
 import org.apache.struts2.config.DefaultPropertiesProvider;
 import org.apache.struts2.config.PropertiesConfigurationProvider;
+import org.apache.struts2.config.StrutsJavaConfiguration;
+import org.apache.struts2.config.StrutsJavaConfigurationProvider;
 import org.apache.struts2.config.StrutsXmlConfigurationProvider;
 import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.apache.struts2.dispatcher.multipart.MultiPartRequest;
@@ -411,6 +412,30 @@ public class Dispatcher {
         return new StrutsXmlConfigurationProvider(filename, errorIfMissing, ctx);
     }
 
+    private void init_JavaConfigurations() {
+        String configClasses = initParams.get("javaConfigClasses");
+        if (configClasses != null) {
+            String[] classes = configClasses.split("\\s*[,]\\s*");
+            for (String cname : classes) {
+                try {
+                    Class cls = ClassLoaderUtil.loadClass(cname, this.getClass());
+                    StrutsJavaConfiguration config = (StrutsJavaConfiguration) cls.newInstance();
+                    configurationManager.addContainerProvider(createJavaConfigurationProvider(config));
+                } catch (InstantiationException e) {
+                    throw new ConfigurationException("Unable to instantiate java configuration: " + cname, e);
+                } catch (IllegalAccessException e) {
+                    throw new ConfigurationException("Unable to access java configuration: " + cname, e);
+                } catch (ClassNotFoundException e) {
+                    throw new ConfigurationException("Unable to locate java configuration class: " + cname, e);
+                }
+            }
+        }
+    }
+
+    protected StrutsJavaConfigurationProvider createJavaConfigurationProvider(StrutsJavaConfiguration config) {
+        return new StrutsJavaConfigurationProvider(config);
+    }
+
     private void init_CustomConfigurationProviders() {
         String configProvs = initParams.get("configProviders");
         if (configProvs != null) {
@@ -488,6 +513,7 @@ public class Dispatcher {
             init_FileManager();
             init_DefaultProperties(); // [1]
             init_TraditionalXmlConfigurations(); // [2]
+            init_JavaConfigurations();
             init_LegacyStrutsProperties(); // [3]
             init_CustomConfigurationProviders(); // [5]
             init_FilterInitParameters() ; // [6]
@@ -554,15 +580,21 @@ public class Dispatcher {
             extraContext.put(ActionContext.VALUE_STACK, valueStackFactory.createValueStack(stack));
         }
 
-        String timerKey = "Handling request from Dispatcher";
         try {
-            UtilTimerStack.push(timerKey);
             String namespace = mapping.getNamespace();
             String name = mapping.getName();
             String method = mapping.getMethod();
 
-            ActionProxy proxy = getContainer().getInstance(ActionProxyFactory.class).createActionProxy(
-                    namespace, name, method, extraContext, true, false);
+            ActionProxy proxy;
+
+            //check if we are probably in an async resuming
+            ActionInvocation invocation = ActionContext.getContext().getActionInvocation();
+            if (invocation == null || invocation.isExecuted()) {
+                proxy = getContainer().getInstance(ActionProxyFactory.class).createActionProxy(namespace, name, method,
+                        extraContext, true, false);
+            } else {
+                proxy = invocation.getProxy();
+            }
 
             request.setAttribute(ServletActionContext.STRUTS_VALUESTACK_KEY, proxy.getInvocation().getStack());
 
@@ -588,8 +620,6 @@ public class Dispatcher {
             } else {
                 throw new ServletException(e);
             }
-        } finally {
-            UtilTimerStack.pop(timerKey);
         }
     }
 

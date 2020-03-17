@@ -22,6 +22,7 @@ import com.opensymphony.xwork2.config.entities.ActionConfig;
 import com.opensymphony.xwork2.config.entities.InterceptorMapping;
 import com.opensymphony.xwork2.config.entities.ResultConfig;
 import com.opensymphony.xwork2.config.providers.XmlConfigurationProvider;
+import com.opensymphony.xwork2.interceptor.PreResultListener;
 import com.opensymphony.xwork2.mock.MockActionProxy;
 import com.opensymphony.xwork2.mock.MockInterceptor;
 import com.opensymphony.xwork2.mock.MockResult;
@@ -33,6 +34,9 @@ import org.apache.struts2.dispatcher.HttpParameters;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -87,11 +91,8 @@ public class DefaultActionInvocationTest extends XWorkTestCase {
 
     public void testInvokingExistingExecuteMethod() throws Exception {
         // given
-        DefaultActionInvocation dai = new DefaultActionInvocation(new HashMap<String, Object>(), false) {
-            public ValueStack getStack() {
-                return new StubValueStack();
-            }
-        };
+        DefaultActionInvocation dai = new DefaultActionInvocation(ActionContext.getContext().getContextMap(), false);
+        container.inject(dai);
 
         SimpleAction action = new SimpleAction() {
             @Override
@@ -102,6 +103,7 @@ public class DefaultActionInvocationTest extends XWorkTestCase {
         MockActionProxy proxy = new MockActionProxy();
         proxy.setMethod("execute");
 
+        dai.stack = container.getInstance(ValueStackFactory.class).createValueStack();
         dai.proxy = proxy;
         dai.ognlUtil = new OgnlUtil();
 
@@ -114,11 +116,8 @@ public class DefaultActionInvocationTest extends XWorkTestCase {
 
     public void testInvokingMissingMethod() throws Exception {
         // given
-        DefaultActionInvocation dai = new DefaultActionInvocation(new HashMap<String, Object>(), false) {
-            public ValueStack getStack() {
-                return new StubValueStack();
-            }
-        };
+        DefaultActionInvocation dai = new DefaultActionInvocation(ActionContext.getContext().getContextMap(), false);
+        container.inject(dai);
 
         SimpleAction action = new SimpleAction() {
             @Override
@@ -136,6 +135,7 @@ public class DefaultActionInvocationTest extends XWorkTestCase {
             }
         };
 
+        dai.stack = container.getInstance(ValueStackFactory.class).createValueStack();
         dai.proxy = proxy;
         dai.ognlUtil = new OgnlUtil();
         dai.unknownHandlerManager = uhm;
@@ -155,11 +155,8 @@ public class DefaultActionInvocationTest extends XWorkTestCase {
 
     public void testInvokingExistingMethodThatThrowsException() throws Exception {
         // given
-        DefaultActionInvocation dai = new DefaultActionInvocation(new HashMap<String, Object>(), false) {
-            public ValueStack getStack() {
-                return new StubValueStack();
-            }
-        };
+        DefaultActionInvocation dai = new DefaultActionInvocation(ActionContext.getContext().getContextMap(), false);
+        container.inject(dai);
 
         SimpleAction action = new SimpleAction() {
             @Override
@@ -170,6 +167,7 @@ public class DefaultActionInvocationTest extends XWorkTestCase {
         MockActionProxy proxy = new MockActionProxy();
         proxy.setMethod("execute");
 
+        dai.stack = container.getInstance(ValueStackFactory.class).createValueStack();
         dai.proxy = proxy;
         dai.ognlUtil = new OgnlUtil();
 
@@ -188,11 +186,8 @@ public class DefaultActionInvocationTest extends XWorkTestCase {
 
     public void testUnknownHandlerManagerThatThrowsException() throws Exception {
         // given
-        DefaultActionInvocation dai = new DefaultActionInvocation(new HashMap<String, Object>(), false) {
-            public ValueStack getStack() {
-                return new StubValueStack();
-            }
-        };
+        DefaultActionInvocation dai = new DefaultActionInvocation(ActionContext.getContext().getContextMap(), false);
+        container.inject(dai);
 
         UnknownHandlerManager uhm = new DefaultUnknownHandlerManager() {
             @Override
@@ -209,6 +204,7 @@ public class DefaultActionInvocationTest extends XWorkTestCase {
         MockActionProxy proxy = new MockActionProxy();
         proxy.setMethod("notExists");
 
+        dai.stack = container.getInstance(ValueStackFactory.class).createValueStack();
         dai.proxy = proxy;
         dai.ognlUtil = new OgnlUtil();
         dai.unknownHandlerManager = uhm;
@@ -229,11 +225,8 @@ public class DefaultActionInvocationTest extends XWorkTestCase {
 
     public void testUnknownHandlerManagerThatReturnsNull() throws Exception {
         // given
-        DefaultActionInvocation dai = new DefaultActionInvocation(new HashMap<String, Object>(), false) {
-            public ValueStack getStack() {
-                return new StubValueStack();
-            }
-        };
+        DefaultActionInvocation dai = new DefaultActionInvocation(ActionContext.getContext().getContextMap(), false);
+        container.inject(dai);
 
         UnknownHandlerManager uhm = new DefaultUnknownHandlerManager() {
             @Override
@@ -250,6 +243,7 @@ public class DefaultActionInvocationTest extends XWorkTestCase {
         MockActionProxy proxy = new MockActionProxy();
         proxy.setMethod("notExists");
 
+        dai.stack = container.getInstance(ValueStackFactory.class).createValueStack();
         dai.proxy = proxy;
         dai.ognlUtil = new OgnlUtil();
         dai.unknownHandlerManager = uhm;
@@ -269,11 +263,8 @@ public class DefaultActionInvocationTest extends XWorkTestCase {
 
     public void testUnknownHandlerManagerThatReturnsSuccess() throws Exception {
         // given
-        DefaultActionInvocation dai = new DefaultActionInvocation(new HashMap<String, Object>(), false) {
-            public ValueStack getStack() {
-                return new StubValueStack();
-            }
-        };
+        DefaultActionInvocation dai = new DefaultActionInvocation(ActionContext.getContext().getContextMap(), false);
+        container.inject(dai);
 
         UnknownHandlerManager uhm = new DefaultUnknownHandlerManager() {
             @Override
@@ -290,6 +281,7 @@ public class DefaultActionInvocationTest extends XWorkTestCase {
         MockActionProxy proxy = new MockActionProxy();
         proxy.setMethod("notExists");
 
+        dai.stack = container.getInstance(ValueStackFactory.class).createValueStack();
         dai.proxy = proxy;
         dai.ognlUtil = new OgnlUtil();
         dai.unknownHandlerManager = uhm;
@@ -320,6 +312,92 @@ public class DefaultActionInvocationTest extends XWorkTestCase {
 
         assertEquals("this is blah", action.getBlah());
         assertEquals("this is blah", action.getName());
+    }
+
+    public void testInvokeWithAsyncManager() throws Exception {
+        DefaultActionInvocation dai = new DefaultActionInvocation(new HashMap<String, Object>(), false);
+        dai.stack = container.getInstance(ValueStackFactory.class).createValueStack();
+
+        final Semaphore lock = new Semaphore(1);
+        lock.acquire();
+        dai.setAsyncManager(new AsyncManager() {
+            Object asyncActionResult;
+            @Override
+            public boolean hasAsyncActionResult() {
+                return asyncActionResult != null;
+            }
+
+            @Override
+            public Object getAsyncActionResult() {
+                return asyncActionResult;
+            }
+
+            @Override
+            public void invokeAsyncAction(Callable asyncAction) {
+                try {
+                    asyncActionResult = asyncAction.call();
+                } catch (Exception e) {
+                    asyncActionResult = e;
+                }
+                lock.release();
+            }
+        });
+
+        dai.action = new Callable<Callable<String>>() {
+            @Override
+            public Callable<String> call() throws Exception {
+                return new Callable<String>() {
+                    @Override
+                    public String call() throws Exception {
+                        return "success";
+                    }
+                };
+            }
+        };
+
+        MockActionProxy actionProxy = new MockActionProxy();
+        actionProxy.setMethod("call");
+        dai.proxy = actionProxy;
+
+        final boolean[] preResultExecuted = new boolean[1];
+        dai.addPreResultListener(new PreResultListener() {
+            @Override
+            public void beforeResult(ActionInvocation invocation, String resultCode) {
+                preResultExecuted[0] = true;
+            }
+        });
+
+        List<InterceptorMapping> interceptorMappings = new ArrayList<>();
+        MockInterceptor mockInterceptor1 = new MockInterceptor();
+        mockInterceptor1.setFoo("test1");
+        mockInterceptor1.setExpectedFoo("test1");
+        interceptorMappings.add(new InterceptorMapping("test1", mockInterceptor1));
+        dai.interceptors = interceptorMappings.iterator();
+
+        dai.ognlUtil = new OgnlUtil();
+
+        dai.invoke();
+
+        assertTrue("interceptor1 should be executed", mockInterceptor1.isExecuted());
+        assertFalse("preResultListener should no be executed", preResultExecuted[0]);
+        assertNotNull("an async action should be saved", dai.asyncAction);
+        assertFalse("invocation should not be executed", dai.executed);
+        assertNull("a null result should be passed to upper and wait for the async result", dai.resultCode);
+
+        if(lock.tryAcquire(1500L, TimeUnit.MILLISECONDS)) {
+            try {
+                dai.invoke();
+                assertTrue("preResultListener should be executed", preResultExecuted[0]);
+                assertNull("async action should be cleared", dai.asyncAction);
+                assertTrue("invocation should be executed", dai.executed);
+                assertEquals("success", dai.resultCode);
+            } finally {
+                lock.release();
+            }
+        } else {
+            lock.release();
+            fail("async result did not received on timeout!");
+        }
     }
 
     public void testActionEventListener() throws Exception {

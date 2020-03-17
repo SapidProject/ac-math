@@ -57,6 +57,7 @@ public class Checkbox extends UIBean {
     final public static String TEMPLATE = "checkbox";
 
     protected String fieldValue;
+    protected String submitUnchecked;
 
     public Checkbox(ValueStack stack, HttpServletRequest request, HttpServletResponse response) {
         super(stack, request, response);
@@ -72,6 +73,12 @@ public class Checkbox extends UIBean {
         } else {
             addParameter("fieldValue", "true");
         }
+
+        if (submitUnchecked != null) {
+            addParameter("submitUnchecked", findValue(submitUnchecked, Boolean.class));
+        } else {
+            addParameter("submitUnchecked", false);
+        }
     }
 
     protected Class getValueClassType() {
@@ -83,4 +90,8 @@ public class Checkbox extends UIBean {
         this.fieldValue = fieldValue;
     }
 
+    @StrutsTagAttribute(description="If set to true, unchecked elements will be submitted with the form.", type="Boolean", defaultValue="false")
+    public void setSubmitUnchecked(String submitUnchecked) {
+        this.submitUnchecked = submitUnchecked;
+    }
 }

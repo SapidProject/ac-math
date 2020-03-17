@@ -18,29 +18,42 @@
  */
 package com.opensymphony.xwork2.config.providers;
 
-import com.opensymphony.xwork2.config.ConfigurationException;
-import com.opensymphony.xwork2.config.ConfigurationProvider;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.struts2.StrutsConstants;
 
 public class XmlConfigurationProviderEnvsSubstitutionTest extends ConfigurationTestBase {
 
-    public void testSubstitution() throws ConfigurationException {
-        final String filename = "com/opensymphony/xwork2/config/providers/xwork-test-envs-substitution.xml";
-        ConfigurationProvider provider = buildConfigurationProvider(filename);
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
 
-        configurationManager.addContainerProvider(provider);
+        configurationManager.addContainerProvider(buildConfigurationProvider(
+                "com/opensymphony/xwork2/config/providers/xwork-test-envs-substitution.xml"));
         configurationManager.reload();
         configuration = configurationManager.getConfiguration();
         container = configuration.getContainer();
+    }
 
-        String foo = container.getInstance(String.class, "foo");
-        assertEquals("bar", foo);
+    public void testSubstitution() {
+        assertEquals("bar", container.getInstance(String.class, "foo"));
 
-        String user = container.getInstance(String.class, "user");
-        assertEquals(System.getenv("USER"), user);
+        String user;
+        if (SystemUtils.IS_OS_WINDOWS) {
+            user = container.getInstance(String.class, "username");
+            assertEquals(System.getenv("USERNAME"), user);
+        } else {
+            user = container.getInstance(String.class, "user");
+            assertEquals(System.getenv("USER"), user);
+        }
 
-        String home = container.getInstance(String.class, "home");
-        assertEquals("Current HOME = " + System.getenv("HOME"), home);
+        String home;
+        if (SystemUtils.IS_OS_WINDOWS) {
+            home = container.getInstance(String.class, "homedrive.homepath");
+            assertEquals("Current HOMEDRIVE.HOMEPATH = " + System.getenv("HOMEDRIVE") + System.getenv("HOMEPATH"), home);
+        } else {
+            home = container.getInstance(String.class, "home");
+            assertEquals("Current HOME = " + System.getenv("HOME"), home);
+        }
 
         String os = container.getInstance(String.class, "os");
         assertEquals("Current OS = " + System.getProperty("os.name"), os);

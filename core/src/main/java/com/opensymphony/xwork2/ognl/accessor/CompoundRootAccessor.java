@@ -18,7 +18,6 @@
  */
 package com.opensymphony.xwork2.ognl.accessor;
 
-import com.opensymphony.xwork2.XWorkConstants;
 import com.opensymphony.xwork2.XWorkException;
 import com.opensymphony.xwork2.inject.Inject;
 import com.opensymphony.xwork2.ognl.OgnlValueStack;
@@ -28,6 +27,7 @@ import ognl.*;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.struts2.StrutsConstants;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -63,11 +63,15 @@ public class CompoundRootAccessor implements PropertyAccessor, MethodAccessor, C
     private final static Logger LOG = LogManager.getLogger(CompoundRootAccessor.class);
     private final static Class[] EMPTY_CLASS_ARRAY = new Class[0];
     private static Map<MethodCall, Boolean> invalidMethods = new ConcurrentHashMap<>();
-    private boolean devMode = false;
+    private boolean devMode;
 
-    @Inject(XWorkConstants.DEV_MODE)
-    public void setDevMode(String mode) {
+    @Inject(StrutsConstants.STRUTS_DEVMODE)
+    protected void setDevMode(String mode) {
         this.devMode = BooleanUtils.toBoolean(mode);
+        if (this.devMode) {
+            LOG.warn("Setting development mode [{}] affects the safety of your application!",
+                        this.devMode);
+        }
     }
 
     public void setProperty(Map context, Object target, Object name, Object value) throws OgnlException {

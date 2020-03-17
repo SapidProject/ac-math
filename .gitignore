@@ -24,6 +24,7 @@ Servers/
 .java-version
 
 # Maven
+.mvn/wrapper/maven-wrapper.jar
 core/target
 plugins/convention/target
 plugins/embeddedjsp/target
@@ -62,3 +63,4 @@ bundles/target
 plugins/target
 target
 plugins/testng/test-output
+test-output

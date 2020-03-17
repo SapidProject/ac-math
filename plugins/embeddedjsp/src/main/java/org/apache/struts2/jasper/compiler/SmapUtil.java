@@ -179,14 +179,6 @@ public class SmapUtil {
         return path.substring(path.lastIndexOf('/') + 1);
     }
 
-    /**
-     * Returns a file path corresponding to a potential SMAP input
-     * for the given compilation input (JSP file).
-     */
-    private static String inputSmapPath(String path) {
-        return path.substring(0, path.lastIndexOf('.') + 1) + "smap";
-    }
-
     //*********************************************************************
     // Installation logic (from Robert Field, JSR-045 spec lead)
     private static class SDEInstaller {
@@ -264,9 +256,9 @@ public class SmapUtil {
             addSDE();
 
             // write result
-            FileOutputStream outStream = new FileOutputStream(outClassFile);
-            outStream.write(gen, 0, genPos);
-            outStream.close();
+            try(FileOutputStream outStream = new FileOutputStream(outClassFile)) {
+                outStream.write(gen, 0, genPos);
+            }
         }
 
         SDEInstaller(File inClassFile, File attrFile, File outClassFile)
@@ -275,14 +267,14 @@ public class SmapUtil {
         }
 
         static byte[] readWhole(File input) throws IOException {
-            FileInputStream inStream = new FileInputStream(input);
-            int len = (int)input.length();
-            byte[] bytes = new byte[len];
-            if (inStream.read(bytes, 0, len) != len) {
-                throw new IOException("expected size: " + len);
+            try (FileInputStream inStream = new FileInputStream(input)) {
+                int len = (int) input.length();
+                byte[] bytes = new byte[len];
+                if (inStream.read(bytes, 0, len) != len) {
+                    throw new IOException("expected size: " + len);
+                }
+                return bytes;
             }
-            inStream.close();
-            return bytes;
         }
 
         void addSDE() throws UnsupportedEncodingException, IOException {

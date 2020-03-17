@@ -18,7 +18,6 @@
  */
 package com.opensymphony.xwork2.ognl;
 
-import com.opensymphony.xwork2.XWorkConstants;
 import com.opensymphony.xwork2.config.ConfigurationException;
 import com.opensymphony.xwork2.conversion.impl.XWorkConverter;
 import com.opensymphony.xwork2.inject.Container;
@@ -58,44 +57,61 @@ public class OgnlUtil {
     private final ConcurrentMap<Class, BeanInfo> beanInfoCache = new ConcurrentHashMap<>();
     private TypeConverter defaultConverter;
 
-    private boolean devMode = false;
+    private boolean devMode;
     private boolean enableExpressionCache = true;
     private boolean enableEvalExpression;
 
-    private Set<Class<?>> excludedClasses = Collections.emptySet();
-    private Set<Pattern> excludedPackageNamePatterns = Collections.emptySet();
-    private Set<String> excludedPackageNames = Collections.emptySet();
+    private Set<Class<?>> excludedClasses;
+    private Set<Pattern> excludedPackageNamePatterns;
+    private Set<String> excludedPackageNames;
 
     private Container container;
     private boolean allowStaticMethodAccess;
     private boolean disallowProxyMemberAccess;
 
+    public OgnlUtil() {
+        excludedClasses = new HashSet<>();
+        excludedPackageNamePatterns = new HashSet<>();
+        excludedPackageNames = new HashSet<>();
+    }
+
     @Inject
-    public void setXWorkConverter(XWorkConverter conv) {
+    protected void setXWorkConverter(XWorkConverter conv) {
         this.defaultConverter = new OgnlTypeConverterWrapper(conv);
     }
 
-    @Inject(XWorkConstants.DEV_MODE)
-    public void setDevMode(String mode) {
+    @Inject(StrutsConstants.STRUTS_DEVMODE)
+    protected void setDevMode(String mode) {
         this.devMode = BooleanUtils.toBoolean(mode);
+        if (this.devMode) {
+            LOG.warn("Setting development mode [{}] affects the safety of your application!",
+                        this.devMode);
+        }
     }
 
-    @Inject(XWorkConstants.ENABLE_OGNL_EXPRESSION_CACHE)
-    public void setEnableExpressionCache(String cache) {
+    @Inject(StrutsConstants.STRUTS_ENABLE_OGNL_EXPRESSION_CACHE)
+    protected void setEnableExpressionCache(String cache) {
         enableExpressionCache = BooleanUtils.toBoolean(cache);
     }
 
-    @Inject(value = XWorkConstants.ENABLE_OGNL_EVAL_EXPRESSION, required = false)
-    public void setEnableEvalExpression(String evalExpression) {
-        enableEvalExpression = "true".equals(evalExpression);
-        if(enableEvalExpression){
+    @Inject(value = StrutsConstants.STRUTS_ENABLE_OGNL_EVAL_EXPRESSION, required = false)
+    protected void setEnableEvalExpression(String evalExpression) {
+        this.enableEvalExpression = BooleanUtils.toBoolean(evalExpression);
+        if (this.enableEvalExpression) {
             LOG.warn("Enabling OGNL expression evaluation may introduce security risks " +
                     "(see http://struts.apache.org/release/2.3.x/docs/s2-013.html for further details)");
         }
     }
 
-    @Inject(value = XWorkConstants.OGNL_EXCLUDED_CLASSES, required = false)
-    public void setExcludedClasses(String commaDelimitedClasses) {
+    @Inject(value = StrutsConstants.STRUTS_EXCLUDED_CLASSES, required = false)
+    protected void setExcludedClasses(String commaDelimitedClasses) {
+        Set<Class<?>> excludedClasses = new HashSet<>();
+        excludedClasses.addAll(this.excludedClasses);
+        excludedClasses.addAll(parseExcludedClasses(commaDelimitedClasses));
+        this.excludedClasses = Collections.unmodifiableSet(excludedClasses);
+    }
+
+    private Set<Class<?>> parseExcludedClasses(String commaDelimitedClasses) {
         Set<String> classNames = TextParseUtil.commaDelimitedStringToSet(commaDelimitedClasses);
         Set<Class<?>> classes = new HashSet<>();
 
@@ -107,11 +123,18 @@ public class OgnlUtil {
             }
         }
 
-        excludedClasses = Collections.unmodifiableSet(classes);
+        return classes;
     }
 
-    @Inject(value = XWorkConstants.OGNL_EXCLUDED_PACKAGE_NAME_PATTERNS, required = false)
-    public void setExcludedPackageNamePatterns(String commaDelimitedPackagePatterns) {
+    @Inject(value = StrutsConstants.STRUTS_EXCLUDED_PACKAGE_NAME_PATTERNS, required = false)
+    protected void setExcludedPackageNamePatterns(String commaDelimitedPackagePatterns) {
+        Set<Pattern> excludedPackageNamePatterns = new HashSet<>();
+        excludedPackageNamePatterns.addAll(this.excludedPackageNamePatterns);
+        excludedPackageNamePatterns.addAll(parseExcludedPackageNamePatterns(commaDelimitedPackagePatterns));
+        this.excludedPackageNamePatterns = Collections.unmodifiableSet(excludedPackageNamePatterns);
+    }
+
+    private Set<Pattern> parseExcludedPackageNamePatterns(String commaDelimitedPackagePatterns) {
         Set<String> packagePatterns = TextParseUtil.commaDelimitedStringToSet(commaDelimitedPackagePatterns);
         Set<Pattern> packageNamePatterns = new HashSet<>();
 
@@ -119,12 +142,19 @@ public class OgnlUtil {
             packageNamePatterns.add(Pattern.compile(pattern));
         }
 
-        excludedPackageNamePatterns = Collections.unmodifiableSet(packageNamePatterns);
+        return packageNamePatterns;
     }
 
-    @Inject(value = XWorkConstants.OGNL_EXCLUDED_PACKAGE_NAMES, required = false)
-    public void setExcludedPackageNames(String commaDelimitedPackageNames) {
-        excludedPackageNames = Collections.unmodifiableSet(TextParseUtil.commaDelimitedStringToSet(commaDelimitedPackageNames));
+    @Inject(value = StrutsConstants.STRUTS_EXCLUDED_PACKAGE_NAMES, required = false)
+    protected void setExcludedPackageNames(String commaDelimitedPackageNames) {
+        Set<String> excludedPackageNames = new HashSet<>();
+        excludedPackageNames.addAll(this.excludedPackageNames);
+        excludedPackageNames.addAll(parseExcludedPackageNames(commaDelimitedPackageNames));
+        this.excludedPackageNames = Collections.unmodifiableSet(excludedPackageNames);
+    }
+
+    private Set<String> parseExcludedPackageNames(String commaDelimitedPackageNames) {
+        return TextParseUtil.commaDelimitedStringToSet(commaDelimitedPackageNames);
     }
 
     public Set<Class<?>> getExcludedClasses() {
@@ -140,18 +170,27 @@ public class OgnlUtil {
     }
 
     @Inject
-    public void setContainer(Container container) {
+    protected void setContainer(Container container) {
         this.container = container;
     }
 
-    @Inject(value = XWorkConstants.ALLOW_STATIC_METHOD_ACCESS, required = false)
-    public void setAllowStaticMethodAccess(String allowStaticMethodAccess) {
-        this.allowStaticMethodAccess = Boolean.parseBoolean(allowStaticMethodAccess);
+    @Inject(value = StrutsConstants.STRUTS_ALLOW_STATIC_METHOD_ACCESS, required = false)
+    protected void setAllowStaticMethodAccess(String allowStaticMethodAccess) {
+        this.allowStaticMethodAccess = BooleanUtils.toBoolean(allowStaticMethodAccess);
+        if (this.allowStaticMethodAccess) {
+            LOG.warn("Setting allow static method access [{}] affects the safety of your application!",
+                        this.allowStaticMethodAccess);
+        }
     }
 
     @Inject(value = StrutsConstants.STRUTS_DISALLOW_PROXY_MEMBER_ACCESS, required = false)
-    public void setDisallowProxyMemberAccess(String disallowProxyMemberAccess) {
+    protected void setDisallowProxyMemberAccess(String disallowProxyMemberAccess) {
+
         this.disallowProxyMemberAccess = Boolean.parseBoolean(disallowProxyMemberAccess);
+        if (this.disallowProxyMemberAccess == false) {
+            LOG.warn("Setting disallow proxy member access [{}] should only be done intentionally!",
+                        this.disallowProxyMemberAccess);
+        }
     }
 
     public boolean isDisallowProxyMemberAccess() {
@@ -183,8 +222,6 @@ public class OgnlUtil {
         if (props == null) {
             return;
         }
-
-        Ognl.setTypeConverter(context, getTypeConverterFromContext(context));
 
         Object oldRoot = Ognl.getRoot(context);
         Ognl.setRoot(context, o);
@@ -245,7 +282,6 @@ public class OgnlUtil {
      *                                problems setting the property
      */
     public void setProperty(String name, Object value, Object o, Map<String, Object> context, boolean throwPropertyExceptions) {
-        Ognl.setTypeConverter(context, getTypeConverterFromContext(context));
 
         Object oldRoot = Ognl.getRoot(context);
         Ognl.setRoot(context, o);
@@ -404,7 +440,7 @@ public class OgnlUtil {
 
         final T exec = task.execute(tree);
         // if cache is enabled and it's a valid expression, puts it in
-        if(enableExpressionCache) {
+        if (enableExpressionCache) {
             expressions.putIfAbsent(expression, tree);
         }
         return exec;
@@ -425,7 +461,7 @@ public class OgnlUtil {
 
         final T exec = task.execute(tree);
         // if cache is enabled and it's a valid expression, puts it in
-        if(enableExpressionCache) {
+        if (enableExpressionCache) {
             expressions.putIfAbsent(expression, tree);
         }
         return exec;
@@ -487,11 +523,8 @@ public class OgnlUtil {
             return;
         }
 
-        TypeConverter converter = getTypeConverterFromContext(context);
         final Map contextFrom = createDefaultContext(from, null);
-        Ognl.setTypeConverter(contextFrom, converter);
         final Map contextTo = createDefaultContext(to, null);
-        Ognl.setTypeConverter(contextTo, converter);
 
         PropertyDescriptor[] fromPds;
         PropertyDescriptor[] toPds;
@@ -641,8 +674,7 @@ public class OgnlUtil {
      */
     public BeanInfo getBeanInfo(Class clazz) throws IntrospectionException {
         synchronized (beanInfoCache) {
-            BeanInfo beanInfo;
-            beanInfo = beanInfoCache.get(clazz);
+            BeanInfo beanInfo = beanInfoCache.get(clazz);
             if (beanInfo == null) {
                 beanInfo = Introspector.getBeanInfo(clazz, Object.class);
                 beanInfoCache.putIfAbsent(clazz, beanInfo);
@@ -667,18 +699,6 @@ public class OgnlUtil {
         }
     }
 
-    TypeConverter getTypeConverterFromContext(Map<String, Object> context) {
-        /*ValueStack stack = (ValueStack) context.get(ActionContext.VALUE_STACK);
-        Container cont = (Container)stack.getContext().get(ActionContext.CONTAINER);
-        if (cont != null) {
-            return new OgnlTypeConverterWrapper(cont.getInstance(XWorkConverter.class));
-        } else {
-            throw new IllegalArgumentException("Cannot find type converter in context map");
-        }
-        */
-        return defaultConverter;
-    }
-
     protected Map createDefaultContext(Object root) {
         return createDefaultContext(root, null);
     }
@@ -695,7 +715,7 @@ public class OgnlUtil {
         memberAccess.setExcludedPackageNames(excludedPackageNames);
         memberAccess.setDisallowProxyMemberAccess(disallowProxyMemberAccess);
 
-        return Ognl.createDefaultContext(root, resolver, defaultConverter, memberAccess);
+        return Ognl.createDefaultContext(root, memberAccess, resolver, defaultConverter);
     }
 
     private interface OgnlTask<T> {

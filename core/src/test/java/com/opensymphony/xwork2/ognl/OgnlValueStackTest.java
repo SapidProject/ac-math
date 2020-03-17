@@ -19,7 +19,11 @@
 package com.opensymphony.xwork2.ognl;
 
 import com.opensymphony.xwork2.*;
+import com.opensymphony.xwork2.config.ConfigurationManager;
+import com.opensymphony.xwork2.config.ConfigurationProvider;
+import com.opensymphony.xwork2.config.providers.XmlConfigurationProvider;
 import com.opensymphony.xwork2.conversion.impl.XWorkConverter;
+import com.opensymphony.xwork2.inject.Container;
 import com.opensymphony.xwork2.ognl.accessor.CompoundRootAccessor;
 import com.opensymphony.xwork2.test.TestBean2;
 import com.opensymphony.xwork2.util.*;
@@ -594,7 +598,7 @@ public class OgnlValueStackTest extends XWorkTestCase {
         assertEquals("bar:123", vs.findValue("foo.bar", String.class));
     }
 
-    public void testPrimitiveSettingWithInvalidValueAddsFieldErrorInDevMode() {
+    public void testPrimitiveSettingWithInvalidValueAddsFieldErrorInDevMode() throws Exception {
         SimpleAction action = new SimpleAction();
         OgnlValueStack stack = createValueStack();
         stack.getContext().put(XWorkConverter.REPORT_CONVERSION_ERRORS, Boolean.TRUE);
@@ -613,7 +617,7 @@ public class OgnlValueStackTest extends XWorkTestCase {
         assertTrue(conversionErrors.containsKey("bar"));
     }
 
-    public void testPrimitiveSettingWithInvalidValueAddsFieldErrorInNonDevMode() {
+    public void testPrimitiveSettingWithInvalidValueAddsFieldErrorInNonDevMode() throws Exception {
         SimpleAction action = new SimpleAction();
         OgnlValueStack stack = createValueStack();
         stack.getContext().put(XWorkConverter.REPORT_CONVERSION_ERRORS, Boolean.TRUE);
@@ -733,11 +737,32 @@ public class OgnlValueStackTest extends XWorkTestCase {
         assertEquals("Cat One", ((Cat) foo.getCats().get(0)).getName());
         assertEquals("Cat Two", ((Cat) foo.getCats().get(1)).getName());
 
+        //test when both Key and Value types of Map are interfaces but concrete classes are defined in .properties file
+        vs.setValue("animalMap[3].name", "Cat Three by interface");
+        vs.setValue("animalMap[6].name", "Cat Six by interface");
+        assertNotNull(foo.getAnimalMap());
+        assertEquals(2, foo.getAnimalMap().size());
+        assertEquals("Cat Three by interface", foo.getAnimalMap().get(new Long(3)).getName());
+        assertEquals("Cat Six by interface", foo.getAnimalMap().get(new Long(6)).getName());
+
+        vs.setValue("annotatedCats[0].name", "Cat One By Annotation");
+        vs.setValue("annotatedCats[1].name", "Cat Two By Annotation");
+        assertNotNull(foo.getAnnotatedCats());
+        assertEquals(2, foo.getAnnotatedCats().size());
+        assertEquals("Cat One By Annotation", ((Cat) foo.getAnnotatedCats().get(0)).getName());
+        assertEquals("Cat Two By Annotation", ((Cat) foo.getAnnotatedCats().get(1)).getName());
+
         vs.setValue("cats[0].foo.cats[1].name", "Deep null cat");
         assertNotNull(((Cat) foo.getCats().get(0)).getFoo());
         assertNotNull(((Cat) foo.getCats().get(0)).getFoo().getCats());
         assertNotNull(((Cat) foo.getCats().get(0)).getFoo().getCats().get(1));
         assertEquals("Deep null cat", ((Cat) ((Cat) foo.getCats().get(0)).getFoo().getCats().get(1)).getName());
+
+        vs.setValue("annotatedCats[0].foo.annotatedCats[1].name", "Deep null cat by annotation");
+        assertNotNull(((Cat) foo.getAnnotatedCats().get(0)).getFoo());
+        assertNotNull(((Cat) foo.getAnnotatedCats().get(0)).getFoo().getAnnotatedCats());
+        assertNotNull(((Cat) foo.getAnnotatedCats().get(0)).getFoo().getAnnotatedCats().get(1));
+        assertEquals("Deep null cat by annotation", ((Cat) ((Cat) foo.getAnnotatedCats().get(0)).getFoo().getAnnotatedCats().get(1)).getName());
     }
 
     public void testSetMultiple() {
@@ -953,6 +978,39 @@ public class OgnlValueStackTest extends XWorkTestCase {
         // should log warning
         assertEquals(null, stack.findValue("address.country.id", String.class));
         assertEquals(null, stack.findValue("address.country.name", String.class));
+    }
+
+    private void reloadTestContainerConfiguration(boolean devMode, boolean allowStatic) throws Exception {
+        super.tearDown();
+
+        ConfigurationProvider configurationProvider;
+        if (devMode == true && allowStatic == true) {
+            configurationProvider = new XmlConfigurationProvider("com/opensymphony/xwork2/config/providers/xwork-test-allowstatic-devmode-true.xml", true);
+        }
+        else if (devMode == true && allowStatic == false) {
+            configurationProvider = new XmlConfigurationProvider("com/opensymphony/xwork2/config/providers/xwork-test-devmode-true.xml", true);
+        }
+        else if (devMode == false && allowStatic == true) {
+            configurationProvider = new XmlConfigurationProvider("com/opensymphony/xwork2/config/providers/xwork-test-allowstatic-true.xml", true);
+        }
+        else {  // devMode, allowStatic both false
+            configurationProvider = new XmlConfigurationProvider("com/opensymphony/xwork2/config/providers/xwork-test-allowstatic-devmode-false.xml", true);
+        }
+
+        configurationManager = new ConfigurationManager(Container.DEFAULT_NAME);
+        configurationManager.addContainerProvider(configurationProvider);
+        configuration = configurationManager.getConfiguration();
+        container = configuration.getContainer();
+        container.inject(configurationProvider);
+        configurationProvider.init(configuration);
+        actionProxyFactory = container.getInstance(ActionProxyFactory.class);
+
+        // Reset the value stack
+        ValueStack stack = container.getInstance(ValueStackFactory.class).createValueStack();
+        stack.getContext().put(ActionContext.CONTAINER, container);
+        ActionContext.setContext(new ActionContext(stack.getContext()));
+
+        ognlUtil = container.getInstance(OgnlUtil.class);
     }
 
     class BadJavaBean {

@@ -18,11 +18,11 @@
  */
 package com.opensymphony.xwork2.security;
 
-import com.opensymphony.xwork2.XWorkConstants;
 import com.opensymphony.xwork2.inject.Inject;
 import com.opensymphony.xwork2.util.TextParseUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.struts2.StrutsConstants;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -43,18 +43,18 @@ public class DefaultAcceptedPatternsChecker implements AcceptedPatternsChecker {
         setAcceptedPatterns(ACCEPTED_PATTERNS);
     }
 
-    @Inject(value = XWorkConstants.OVERRIDE_ACCEPTED_PATTERNS, required = false)
-    public void setOverrideAcceptedPatterns(String acceptablePatterns) {
+    @Inject(value = StrutsConstants.STRUTS_OVERRIDE_ACCEPTED_PATTERNS, required = false)
+    protected void setOverrideAcceptedPatterns(String acceptablePatterns) {
         LOG.warn("Overriding accepted patterns [{}] with [{}], be aware that this affects all instances and safety of your application!",
-                    XWorkConstants.OVERRIDE_ACCEPTED_PATTERNS, acceptablePatterns);
+                    acceptedPatterns, acceptablePatterns);
         acceptedPatterns = new HashSet<>();
         for (String pattern : TextParseUtil.commaDelimitedStringToSet(acceptablePatterns)) {
             acceptedPatterns.add(Pattern.compile(pattern, Pattern.CASE_INSENSITIVE));
         }
     }
 
-    @Inject(value = XWorkConstants.ADDITIONAL_ACCEPTED_PATTERNS, required = false)
-    public void setAdditionalAcceptedPatterns(String acceptablePatterns) {
+    @Inject(value = StrutsConstants.STRUTS_ADDITIONAL_ACCEPTED_PATTERNS, required = false)
+    protected void setAdditionalAcceptedPatterns(String acceptablePatterns) {
         LOG.warn("Adding additional global patterns [{}] to accepted patterns!", acceptablePatterns);
         for (String pattern : TextParseUtil.commaDelimitedStringToSet(acceptablePatterns)) {
             acceptedPatterns.add(Pattern.compile(pattern, Pattern.CASE_INSENSITIVE));
@@ -70,7 +70,14 @@ public class DefaultAcceptedPatternsChecker implements AcceptedPatternsChecker {
     }
 
     public void setAcceptedPatterns(Set<String> patterns) {
-        LOG.trace("Sets accepted patterns [{}]", patterns);
+        if (acceptedPatterns == null) {
+            // Limit unwanted log entries (for 1st call, acceptedPatterns null)
+            LOG.debug("Sets accepted patterns to [{}], note this impacts the safety of your application!", patterns);
+        }
+        else {
+            LOG.warn("Replacing accepted patterns [{}] with [{}], be aware that this affects all instances and safety of your application!",
+                        acceptedPatterns, patterns);
+        }
         acceptedPatterns = new HashSet<>(patterns.size());
         for (String pattern : patterns) {
             acceptedPatterns.add(Pattern.compile(pattern, Pattern.CASE_INSENSITIVE));

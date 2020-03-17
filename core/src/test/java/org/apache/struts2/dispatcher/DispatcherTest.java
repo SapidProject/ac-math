@@ -20,8 +20,9 @@ package org.apache.struts2.dispatcher;
 
 import com.mockobjects.dynamic.C;
 import com.mockobjects.dynamic.Mock;
+import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ObjectFactory;
-import com.opensymphony.xwork2.XWorkConstants;
+import com.opensymphony.xwork2.StubValueStack;
 import com.opensymphony.xwork2.config.Configuration;
 import com.opensymphony.xwork2.config.ConfigurationManager;
 import com.opensymphony.xwork2.config.entities.InterceptorMapping;
@@ -30,8 +31,12 @@ import com.opensymphony.xwork2.config.entities.PackageConfig;
 import com.opensymphony.xwork2.inject.Container;
 import com.opensymphony.xwork2.interceptor.Interceptor;
 import com.opensymphony.xwork2.LocalizedTextProvider;
+import com.opensymphony.xwork2.mock.MockActionInvocation;
+import com.opensymphony.xwork2.mock.MockActionProxy;
+import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.StrutsConstants;
 import org.apache.struts2.StrutsInternalTestCase;
+import org.apache.struts2.dispatcher.mapper.ActionMapping;
 import org.apache.struts2.dispatcher.multipart.MultiPartRequestWrapper;
 import org.apache.struts2.util.ObjectFactoryDestroyable;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -42,6 +47,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 
@@ -129,7 +135,7 @@ public class DispatcherTest extends StrutsInternalTestCase {
 
         assertEquals("utf-8", req.getCharacterEncoding());
     }
-    
+
     public void testPrepareMultipartRequest() throws Exception {
         MockHttpServletRequest req = new MockHttpServletRequest();
         MockHttpServletResponse res = new MockHttpServletResponse();
@@ -170,9 +176,9 @@ public class DispatcherTest extends StrutsInternalTestCase {
     }
 
     public void testDispatcherListener() throws Exception {
-    	
+
     	final DispatcherListenerState state = new DispatcherListenerState();
-    	
+
     	Dispatcher.addDispatcherListener(new DispatcherListener() {
 			public void dispatcherDestroyed(Dispatcher du) {
 				state.isDestroyed = true;
@@ -181,21 +187,21 @@ public class DispatcherTest extends StrutsInternalTestCase {
 				state.isInitialized = true;
 			}
     	});
-    	
-    	
+
+
     	assertFalse(state.isDestroyed);
     	assertFalse(state.isInitialized);
-    	
+
         Dispatcher du = initDispatcher(new HashMap<String, String>() );
-    	
+
     	assertTrue(state.isInitialized);
-    	
+
     	du.cleanup();
 
     	assertTrue(state.isDestroyed);
     }
-    
-    
+
+
     public void testConfigurationManager() {
     	Dispatcher du;
     	final InternalConfigurationManager configurationManager = new InternalConfigurationManager(Container.DEFAULT_NAME);
@@ -203,29 +209,45 @@ public class DispatcherTest extends StrutsInternalTestCase {
     		du = new MockDispatcher(new MockServletContext(), new HashMap<String, String>(), configurationManager);
     		du.init();
             Dispatcher.setInstance(du);
-            
+
             assertFalse(configurationManager.destroyConfiguration);
-            
+
             du.cleanup();
-            
+
             assertTrue(configurationManager.destroyConfiguration);
-            
+
     	}
     	finally {
     		Dispatcher.setInstance(null);
     	}
     }
-    
+
+    public void testInitLoadsDefaultConfig() {
+        Dispatcher du = new Dispatcher(new MockServletContext(), new HashMap<String, String>());
+        du.init();
+        Configuration config = du.getConfigurationManager().getConfiguration();
+        assertNotNull(config);
+        HashSet<String> expected = new HashSet<String>();
+        expected.add("struts-default.xml");
+        expected.add("struts-plugin.xml");
+        expected.add("struts.xml");
+        assertEquals(expected, config.getLoadedFileNames());
+        assertTrue(config.getPackageConfigs().size() > 0);
+        PackageConfig packageConfig = config.getPackageConfig("struts-default");
+        assertTrue(packageConfig.getInterceptorConfigs().size() > 0);
+        assertTrue(packageConfig.getResultTypeConfigs().size() > 0);
+    }
+
     public void testObjectFactoryDestroy() throws Exception {
 
         ConfigurationManager cm = new ConfigurationManager(Container.DEFAULT_NAME);
         Dispatcher du = new MockDispatcher(new MockServletContext(), new HashMap<String, String>(), cm);
         Mock mockConfiguration = new Mock(Configuration.class);
         cm.setConfiguration((Configuration)mockConfiguration.proxy());
-        
+
         Mock mockContainer = new Mock(Container.class);
-        String reloadConfigs = container.getInstance(String.class, XWorkConstants.RELOAD_XML_CONFIGURATION);
-        mockContainer.expectAndReturn("getInstance", C.args(C.eq(String.class), C.eq(XWorkConstants.RELOAD_XML_CONFIGURATION)),
+        String reloadConfigs = container.getInstance(String.class, StrutsConstants.STRUTS_CONFIGURATION_XML_RELOAD);
+        mockContainer.expectAndReturn("getInstance", C.args(C.eq(String.class), C.eq(StrutsConstants.STRUTS_CONFIGURATION_XML_RELOAD)),
                 reloadConfigs);
         final InnerDestroyableObjectFactory destroyedObjectFactory = new InnerDestroyableObjectFactory();
         destroyedObjectFactory.setContainer((Container) mockContainer.proxy());
@@ -243,39 +265,39 @@ public class DispatcherTest extends StrutsInternalTestCase {
         mockConfiguration.verify();
         mockContainer.verify();
     }
-    
-    public void testInterceptorDestroy() throws Exception {           
+
+    public void testInterceptorDestroy() throws Exception {
         Mock mockInterceptor = new Mock(Interceptor.class);
         mockInterceptor.matchAndReturn("hashCode", 0);
         mockInterceptor.expect("destroy");
-        
+
         InterceptorMapping interceptorMapping = new InterceptorMapping("test", (Interceptor) mockInterceptor.proxy());
-        
+
         InterceptorStackConfig isc = new InterceptorStackConfig.Builder("test").addInterceptor(interceptorMapping).build();
-        
+
         PackageConfig packageConfig = new PackageConfig.Builder("test").addInterceptorStackConfig(isc).build();
-        
+
         Map<String, PackageConfig> packageConfigs = new HashMap<String, PackageConfig>();
         packageConfigs.put("test", packageConfig);
 
         Mock mockContainer = new Mock(Container.class);
         mockContainer.matchAndReturn("getInstance", C.args(C.eq(ObjectFactory.class)), new ObjectFactory());
-        String reloadConfigs = container.getInstance(String.class, XWorkConstants.RELOAD_XML_CONFIGURATION);
-        mockContainer.expectAndReturn("getInstance", C.args(C.eq(String.class), C.eq(XWorkConstants.RELOAD_XML_CONFIGURATION)),
+        String reloadConfigs = container.getInstance(String.class, StrutsConstants.STRUTS_CONFIGURATION_XML_RELOAD);
+        mockContainer.expectAndReturn("getInstance", C.args(C.eq(String.class), C.eq(StrutsConstants.STRUTS_CONFIGURATION_XML_RELOAD)),
                 reloadConfigs);
 
         Mock mockConfiguration = new Mock(Configuration.class);
         mockConfiguration.matchAndReturn("getPackageConfigs", packageConfigs);
         mockConfiguration.matchAndReturn("getContainer", mockContainer.proxy());
         mockConfiguration.expect("destroy");
-        
+
         ConfigurationManager configurationManager = new ConfigurationManager(Container.DEFAULT_NAME);
         configurationManager.setConfiguration((Configuration) mockConfiguration.proxy());
-        
+
         Dispatcher dispatcher = new MockDispatcher(new MockServletContext(), new HashMap<String, String>(), configurationManager);
         dispatcher.init();
         dispatcher.cleanup();
-        
+
         mockInterceptor.verify();
         mockContainer.verify();
         mockConfiguration.verify();
@@ -321,6 +343,30 @@ public class DispatcherTest extends StrutsInternalTestCase {
         assertTrue(du.isMultipartRequest(req));
     }
 
+    public void testServiceActionResumePreviousProxy() throws Exception {
+        Dispatcher du = initDispatcher(Collections.<String, String>emptyMap());
+
+        MockActionInvocation mai = new MockActionInvocation();
+        ActionContext.getContext().setActionInvocation(mai);
+
+        MockActionProxy actionProxy = new MockActionProxy();
+        actionProxy.setInvocation(mai);
+        mai.setProxy(actionProxy);
+
+        mai.setStack(new StubValueStack());
+
+        HttpServletRequest req = new MockHttpServletRequest();
+        req.setAttribute(ServletActionContext.STRUTS_VALUESTACK_KEY, mai.getStack());
+
+        assertFalse(actionProxy.isExecutedCalled());
+
+        du.setDevMode("false");
+        du.setHandleException("false");
+        du.serviceAction(req, null, new ActionMapping());
+
+        assertTrue("should execute previous proxy", actionProxy.isExecutedCalled());
+    }
+
     class InternalConfigurationManager extends ConfigurationManager {
     	public boolean destroyConfiguration = false;
 
@@ -334,8 +380,8 @@ public class DispatcherTest extends StrutsInternalTestCase {
     		destroyConfiguration = true;
     	}
     }
-    
-    
+
+
     class DispatcherListenerState {
     	public boolean isInitialized = false;
     	public boolean isDestroyed = false;

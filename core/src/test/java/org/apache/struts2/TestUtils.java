@@ -20,6 +20,7 @@ package org.apache.struts2;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.StringTokenizer;
 
 /**

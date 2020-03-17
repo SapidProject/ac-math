@@ -62,7 +62,7 @@ public class SecurityMemberAccessTest extends TestCase {
         String propertyName = "stringField";
         Member member = FooBar.class.getDeclaredMethod("get" + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1));
 
-        Set<Class<?>> excluded = new HashSet<Class<?>>();
+        Set<Class<?>> excluded = new HashSet<>();
         excluded.add(FooBar.class);
         sma.setExcludedClasses(excluded);
 
@@ -108,7 +108,7 @@ public class SecurityMemberAccessTest extends TestCase {
         String propertyName = "barLogic";
         Member member = BarInterface.class.getMethod(propertyName);
 
-        Set<Class<?>> excluded = new HashSet<Class<?>>();
+        Set<Class<?>> excluded = new HashSet<>();
         excluded.add(BarInterface.class);
         sma.setExcludedClasses(excluded);
 
@@ -126,7 +126,7 @@ public class SecurityMemberAccessTest extends TestCase {
         String propertyName = "fooLogic";
         Member member = FooBar.class.getMethod(propertyName);
 
-        Set<Class<?>> excluded = new HashSet<Class<?>>();
+        Set<Class<?>> excluded = new HashSet<>();
         excluded.add(BarInterface.class);
         sma.setExcludedClasses(excluded);
 
@@ -158,7 +158,7 @@ public class SecurityMemberAccessTest extends TestCase {
         String propertyName = "barLogic";
         Member member = BarInterface.class.getMethod(propertyName);
 
-        Set<Class<?>> excluded = new HashSet<Class<?>>();
+        Set<Class<?>> excluded = new HashSet<>();
         excluded.add(FooBarInterface.class);
         sma.setExcludedClasses(excluded);
 
@@ -173,7 +173,7 @@ public class SecurityMemberAccessTest extends TestCase {
         // given
         SecurityMemberAccess sma = new SecurityMemberAccess(false);
 
-        Set<Pattern> excluded = new HashSet<Pattern>();
+        Set<Pattern> excluded = new HashSet<>();
         excluded.add(Pattern.compile("^" + FooBar.class.getPackage().getName().replaceAll("\\.", "\\\\.") + ".*"));
         sma.setExcludedPackageNamePatterns(excluded);
 
@@ -191,7 +191,7 @@ public class SecurityMemberAccessTest extends TestCase {
         // given
         SecurityMemberAccess sma = new SecurityMemberAccess(false);
 
-        Set<String> excluded = new HashSet<String>();
+        Set<String> excluded = new HashSet<>();
         excluded.add(FooBar.class.getPackage().getName());
         sma.setExcludedPackageNames(excluded);
 
@@ -205,11 +205,11 @@ public class SecurityMemberAccessTest extends TestCase {
         assertFalse("stringField is accessible!", actual);
     }
 
-    public void testDefaultPackageExclusion() throws Exception {
+    public void testDefaultPackageExclusion() {
         // given
         SecurityMemberAccess sma = new SecurityMemberAccess(false);
 
-        Set<Pattern> excluded = new HashSet<Pattern>();
+        Set<Pattern> excluded = new HashSet<>();
         excluded.add(Pattern.compile("^" + FooBar.class.getPackage().getName().replaceAll("\\.", "\\\\.") + ".*"));
         sma.setExcludedPackageNamePatterns(excluded);
         
@@ -220,11 +220,11 @@ public class SecurityMemberAccessTest extends TestCase {
         assertFalse("default package is excluded!", actual);
     }
     
-    public void testDefaultPackageExclusion2() throws Exception {
+    public void testDefaultPackageExclusion2() {
         // given
         SecurityMemberAccess sma = new SecurityMemberAccess(false);
 
-        Set<Pattern> excluded = new HashSet<Pattern>();
+        Set<Pattern> excluded = new HashSet<>();
         excluded.add(Pattern.compile("^$"));
         sma.setExcludedPackageNamePatterns(excluded);
         
@@ -258,6 +258,45 @@ public class SecurityMemberAccessTest extends TestCase {
 
         // then
         assertTrue("Access to static is blocked!", actual);
+    }
+
+    public void testAccessStaticField() throws Exception {
+        // given
+        SecurityMemberAccess sma = new SecurityMemberAccess(true);
+        sma.setExcludedClasses(new HashSet<Class<?>>(Collections.singletonList(Class.class)));
+
+        // when
+        Member method = StaticTester.class.getField("MAX_VALUE");
+        boolean actual = sma.isAccessible(context, null, method, null);
+
+        // then
+        assertTrue("Access to static field is blocked!", actual);
+    }
+
+    public void testBlockedStaticFieldWhenFlagIsFalse() throws Exception {
+        // given
+        SecurityMemberAccess sma = new SecurityMemberAccess(false);
+        sma.setExcludedClasses(new HashSet<Class<?>>(Collections.singletonList(Class.class)));
+
+        // when
+        Member method = StaticTester.class.getField("MAX_VALUE");
+        boolean actual = sma.isAccessible(context, null, method, null);
+
+        // then
+        assertFalse("Access to static field isn't blocked!", actual);
+    }
+
+    public void testBlockedStaticFieldWhenClassIsExcluded() throws Exception {
+        // given
+        SecurityMemberAccess sma = new SecurityMemberAccess(true);
+        sma.setExcludedClasses(new HashSet<>(Arrays.asList(Class.class, StaticTester.class)));
+
+        // when
+        Member method = StaticTester.class.getField("MAX_VALUE");
+        boolean actual = sma.isAccessible(context, null, method, null);
+
+        // then
+        assertFalse("Access to static field isn't blocked!", actual);
     }
 
     public void testBlockStaticAccess() throws Exception {
@@ -317,10 +356,10 @@ public class SecurityMemberAccessTest extends TestCase {
     public void testAccessPrimitiveDoubleWithNames() throws Exception {
         // given
         SecurityMemberAccess sma = new SecurityMemberAccess(false);
-        sma.setExcludedPackageNames(TextParseUtil.commaDelimitedStringToSet("java.lang.,ognl,javax"));
+        sma.setExcludedPackageNames(TextParseUtil.commaDelimitedStringToSet("ognl.,javax."));
 
 
-        Set<Class<?>> excluded = new HashSet<Class<?>>();
+        Set<Class<?>> excluded = new HashSet<>();
         excluded.add(Object.class);
         excluded.add(Runtime.class);
         excluded.add(System.class);
@@ -369,7 +408,7 @@ public class SecurityMemberAccessTest extends TestCase {
     public void testAccessPrimitiveDoubleWithPackageRegExs() throws Exception {
         // given
         SecurityMemberAccess sma = new SecurityMemberAccess(false);
-        Set<Pattern> patterns = new HashSet<Pattern>();
+        Set<Pattern> patterns = new HashSet<>();
         patterns.add(Pattern.compile("^java\\.lang\\..*"));
         sma.setExcludedPackageNamePatterns(patterns);
 
@@ -386,7 +425,7 @@ public class SecurityMemberAccessTest extends TestCase {
     public void testAccessMemberAccessIsAccessible() throws Exception {
         // given
         SecurityMemberAccess sma = new SecurityMemberAccess(false);
-        Set<Class<?>> excluded = new HashSet<Class<?>>();
+        Set<Class<?>> excluded = new HashSet<>();
         excluded.add(ognl.MemberAccess.class);
         sma.setExcludedClasses(excluded);
 
@@ -404,7 +443,7 @@ public class SecurityMemberAccessTest extends TestCase {
     public void testAccessMemberAccessIsBlocked() throws Exception {
         // given
         SecurityMemberAccess sma = new SecurityMemberAccess(false);
-        Set<Class<?>> excluded = new HashSet<Class<?>>();
+        Set<Class<?>> excluded = new HashSet<>();
         excluded.add(SecurityMemberAccess.class);
         sma.setExcludedClasses(excluded);
 
@@ -417,6 +456,21 @@ public class SecurityMemberAccessTest extends TestCase {
 
         // then
         assertFalse(accessible);
+    }
+
+    public void testPackageNameExclusionAsCommaDelimited() {
+        // given
+        SecurityMemberAccess sma = new SecurityMemberAccess(false);
+
+
+        sma.setExcludedPackageNames(TextParseUtil.commaDelimitedStringToSet("java.lang."));
+
+        // when
+        boolean actual = sma.isPackageExcluded(String.class.getPackage(), null);
+        actual &= sma.isPackageExcluded(null, String.class.getPackage());
+
+        // then
+        assertTrue("package java.lang. is accessible!", actual);
     }
 
 }
@@ -488,6 +542,8 @@ enum MyValues {
 }
 
 class StaticTester {
+
+    public static int MAX_VALUE = 0;
 
     public static String sayHello() {
         return "Hello";

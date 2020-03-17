@@ -20,7 +20,6 @@ package com.opensymphony.xwork2.ognl;
 
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.TextProvider;
-import com.opensymphony.xwork2.XWorkConstants;
 import com.opensymphony.xwork2.XWorkException;
 import com.opensymphony.xwork2.conversion.impl.XWorkConverter;
 import com.opensymphony.xwork2.inject.Container;
@@ -35,6 +34,7 @@ import ognl.*;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.struts2.StrutsConstants;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -82,7 +82,7 @@ public class OgnlValueStack implements Serializable, ValueStack, ClearableValueS
     }
 
     @Inject
-    public void setOgnlUtil(OgnlUtil ognlUtil) {
+    protected void setOgnlUtil(OgnlUtil ognlUtil) {
         this.ognlUtil = ognlUtil;
         securityMemberAccess.setExcludedClasses(ognlUtil.getExcludedClasses());
         securityMemberAccess.setExcludedPackageNamePatterns(ognlUtil.getExcludedPackageNamePatterns());
@@ -94,20 +94,23 @@ public class OgnlValueStack implements Serializable, ValueStack, ClearableValueS
                            boolean allowStaticMethodAccess) {
         this.root = compoundRoot;
         this.securityMemberAccess = new SecurityMemberAccess(allowStaticMethodAccess);
-        this.context = Ognl.createDefaultContext(this.root, accessor, new OgnlTypeConverterWrapper(xworkConverter), securityMemberAccess);
+        this.context = Ognl.createDefaultContext(this.root, securityMemberAccess, accessor, new OgnlTypeConverterWrapper(xworkConverter));
         context.put(VALUE_STACK, this);
-        Ognl.setClassResolver(context, accessor);
         ((OgnlContext) context).setTraceEvaluations(false);
         ((OgnlContext) context).setKeepLastEvaluation(false);
     }
 
-    @Inject(XWorkConstants.DEV_MODE)
-    public void setDevMode(String mode) {
+    @Inject(StrutsConstants.STRUTS_DEVMODE)
+    protected void setDevMode(String mode) {
         this.devMode = BooleanUtils.toBoolean(mode);
+        if (this.devMode) {
+            LOG.warn("Setting development mode [{}] affects the safety of your application!",
+                        this.devMode);
+        }
     }
 
     @Inject(value = "logMissingProperties", required = false)
-    public void setLogMissingProperties(String logMissingProperties) {
+    protected void setLogMissingProperties(String logMissingProperties) {
         this.logMissingProperties = BooleanUtils.toBoolean(logMissingProperties);
     }
 
@@ -379,7 +382,7 @@ public class OgnlValueStack implements Serializable, ValueStack, ClearableValueS
      * @param e    The thrown exception.
      */
     private void logLookupFailure(String expr, Exception e) {
-        if (devMode && LOG.isWarnEnabled()) {
+        if (devMode) {
             LOG.warn("Caught an exception while evaluating expression '{}' against value stack", expr, e);
             LOG.warn("NOTE: Previous warning message was issued due to devMode set to true.");
         } else {
@@ -451,7 +454,7 @@ public class OgnlValueStack implements Serializable, ValueStack, ClearableValueS
         XWorkConverter xworkConverter = cont.getInstance(XWorkConverter.class);
         CompoundRootAccessor accessor = (CompoundRootAccessor) cont.getInstance(PropertyAccessor.class, CompoundRoot.class.getName());
         TextProvider prov = cont.getInstance(TextProvider.class, "system");
-        boolean allow = BooleanUtils.toBoolean(cont.getInstance(String.class, XWorkConstants.ALLOW_STATIC_METHOD_ACCESS));
+        boolean allow = BooleanUtils.toBoolean(cont.getInstance(String.class, StrutsConstants.STRUTS_ALLOW_STATIC_METHOD_ACCESS));
         OgnlValueStack aStack = new OgnlValueStack(xworkConverter, accessor, prov, allow);
         aStack.setOgnlUtil(cont.getInstance(OgnlUtil.class));
         aStack.setRoot(xworkConverter, accessor, this.root, allow);
@@ -475,7 +478,7 @@ public class OgnlValueStack implements Serializable, ValueStack, ClearableValueS
     }
 
     @Inject
-    public void setXWorkConverter(final XWorkConverter converter) {
+    protected void setXWorkConverter(final XWorkConverter converter) {
         this.converter = converter;
     }
 }

@@ -18,6 +18,7 @@
  */
 package com.opensymphony.xwork2;
 
+import com.opensymphony.xwork2.conversion.impl.ConversionData;
 import com.opensymphony.xwork2.inject.Container;
 import com.opensymphony.xwork2.util.ValueStack;
 import org.apache.struts2.dispatcher.HttpParameters;
@@ -81,11 +82,6 @@ public class ActionContext implements Serializable {
      * Constant for the action's locale.
      */
     public static final String LOCALE = "com.opensymphony.xwork2.ActionContext.locale";
-
-    /**
-     * Constant for the action's type converter.
-     */
-    public static final String TYPE_CONVERTER = "com.opensymphony.xwork2.ActionContext.typeConverter";
 
     /**
      * Constant for the action's {@link com.opensymphony.xwork2.ActionInvocation invocation} context.
@@ -170,21 +166,12 @@ public class ActionContext implements Serializable {
     }
 
     /**
-     * Sets the action's context map.
-     *
-     * @param contextMap the context map.
-     */
-    public void setContextMap(Map<String, Object> contextMap) {
-        getContext().context = contextMap;
-    }
-
-    /**
      * Gets the context map.
      *
      * @return the context map.
      */
     public Map<String, Object> getContextMap() {
-        return context;
+        return getContext().context;
     }
 
     /**
@@ -192,7 +179,7 @@ public class ActionContext implements Serializable {
      *
      * @param conversionErrors a Map of errors which occurred when executing the action.
      */
-    public void setConversionErrors(Map<String, Object> conversionErrors) {
+    public void setConversionErrors(Map<String, ConversionData> conversionErrors) {
         put(CONVERSION_ERRORS, conversionErrors);
     }
 
@@ -202,8 +189,8 @@ public class ActionContext implements Serializable {
      * @return the map of conversion errors which occurred when executing the action or an empty map if
      *         there were no errors.
      */
-    public Map<String, Object> getConversionErrors() {
-        Map<String, Object> errors = (Map) get(CONVERSION_ERRORS);
+    public Map<String, ConversionData> getConversionErrors() {
+        Map<String, ConversionData> errors = (Map) get(CONVERSION_ERRORS);
 
         if (errors == null) {
             errors = new HashMap<>();

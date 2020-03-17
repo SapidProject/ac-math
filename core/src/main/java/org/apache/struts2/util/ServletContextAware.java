@@ -22,8 +22,15 @@ import javax.servlet.ServletContext;
 
 /**
  * For components that have a dependence on the Servlet context.
+ *
+ * @deprecated please use {@link org.apache.struts2.action.ServletContextAware} instead
  */
+@Deprecated
 public interface ServletContextAware {
 
+    /**
+     * @deprecated please use {@link org.apache.struts2.action.ServletContextAware#withServletContext(ServletContext)} instead
+     */
+    @Deprecated
     public void setServletContext(ServletContext context);
 }
